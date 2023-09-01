@@ -1,6 +1,5 @@
 import { ExpoPushToken } from "expo-notifications";
 import client from "../client";
-import { CreateStoryReaction } from "@/models/dto/Stories";
 import { getDeviceUuid } from "@/business/secure-store/DeviceUuid";
 
 const API_PATH = "/notifications";

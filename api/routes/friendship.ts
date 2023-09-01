@@ -1,6 +1,5 @@
-import { UserProfile } from "@/models/project/UserProfile";
+import { FriendshipStatus, SmallUser } from "@/models/resources/User";
 import client from "../client";
-import { FriendshipStatus } from "@/models/resources/User";
 
 const API_PATH = "/friendships";
 
@@ -15,6 +14,7 @@ export const FetchUserFriends = async (
     user: {
       id: number;
       username: string;
+      fullName: string;
       isVerified: boolean;
       profilePictureUrl: string;
     };
@@ -52,12 +52,7 @@ export const FetchIncomingFriendRequests = async (
   query: string | null = null
 ): Promise<{
   pendingRequests: {
-    user: {
-      id: number;
-      username: string;
-      isVerified: boolean;
-      profilePictureUrl: string;
-    };
+    user: SmallUser;
     pendingAt: Date;
   }[];
   pagination: {
@@ -69,6 +64,41 @@ export const FetchIncomingFriendRequests = async (
 }> => {
   try {
     const response = await client.get(`${API_PATH}/incoming_requests`, {
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+      params: {
+        page: page && page > 0 ? page : 1,
+        size: size && size > 0 ? size : 10,
+        query: query ? query : null,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const FetchOutgoingFriendRequests = async (
+  tokenApi: string,
+  page: number = 1,
+  size: number = 10,
+  query: string | null = null
+): Promise<{
+  pendingRequests: {
+    user: SmallUser;
+    pendingAt: Date;
+  }[];
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    hasMore: boolean;
+  };
+}> => {
+  try {
+    const response = await client.get(`${API_PATH}/outgoing_requests`, {
       headers: {
         Authorization: `Bearer ${tokenApi}`,
       },

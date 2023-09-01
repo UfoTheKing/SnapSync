@@ -55,6 +55,7 @@ const AuthInsertPhoneNumber = ({
         behavior={"height"}
         style={{
           flex: 1,
+          alignItems: "center",
         }}
       >
         <View style={authStyles.containerLogo}>

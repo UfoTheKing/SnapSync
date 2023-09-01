@@ -9,7 +9,7 @@ export interface UserState {
   user: {
     id: number;
     username: string;
-    profilePictureUrl: string | null;
+    profilePictureUrl: string;
     biography: string | null;
     isVerified: boolean;
   } | null;

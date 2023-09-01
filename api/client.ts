@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// export const API_URL = `http://10.167.12.166:8000`;
+// export const API_URL = `http://10.167.12.139:8000`;
 export const API_URL = "http://192.168.178.141:8000";
 
 export interface ErrorResponseType {

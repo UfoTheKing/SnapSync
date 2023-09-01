@@ -5,10 +5,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/types";
 import { useTheme } from "native-base";
 import TopTabNavigator from "./TopTabNavigator";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import OnboardingScreen from "@/screens/Root/OnboardingScreen";
 import AuthStack from "./AuthStack";
+import { login } from "@/business/redux/features/user/userSlice";
+import UserProfileStack from "./UserProfileStack";
+import SnapSyncStack from "./SnapSyncStack";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -24,6 +26,26 @@ const RootNavigation = ({ data }: Props) => {
   const colors = useTheme().colors;
 
   const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+
+  const dispatch = useDispatch();
+
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const loginAuthToken = async () => {
+      if (data && !isLoggedIn) {
+        dispatch(login(data));
+
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    loginAuthToken();
+  }, [data, isLoggedIn]);
+
+  if (isLoading) return null;
 
   return (
     <Stack.Navigator
@@ -43,6 +65,23 @@ const RootNavigation = ({ data }: Props) => {
             component={TopTabNavigator}
             options={{
               headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="UserProfileStack"
+            component={UserProfileStack}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="SnapSyncStack"
+            component={SnapSyncStack}
+            options={{
+              headerShown: false,
+              gestureEnabled: false,
             }}
           />
         </Stack.Group>

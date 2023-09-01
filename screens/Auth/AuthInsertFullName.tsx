@@ -16,6 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useMutation, useQuery } from "react-query";
 import { AuthGetSessionId, AuthValidateFullName } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
+import { ScreenWidth } from "@/constants/Layout";
 
 type Props = {};
 
@@ -110,6 +111,7 @@ const AuthInsertFullName = ({
         behavior={"height"}
         style={{
           flex: 1,
+          alignItems: "center",
         }}
       >
         <View style={authStyles.containerLogo}>
@@ -200,9 +202,8 @@ export const authStyles = StyleSheet.create({
 
   formContainer: {
     maxWidth: 400,
-    width: "100%",
+    width: ScreenWidth,
     paddingHorizontal: 20,
-    // paddingVertical: 20,
   },
   formInput: {
     height: 75,
@@ -213,10 +214,12 @@ export const authStyles = StyleSheet.create({
   },
 
   buttonContainer: {
-    width: "100%",
-    maxWidth: 400,
+    width: ScreenWidth,
     position: "absolute",
-    paddingHorizontal: 20,
+    height: 100,
+    justifyContent: "center",
+
+    maxWidth: 300,
   },
   button: {
     borderRadius: 20,

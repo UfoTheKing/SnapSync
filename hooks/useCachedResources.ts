@@ -6,8 +6,10 @@ import { ILoginResponse } from "@/models/auth/Auth";
 import {
   getAuthToken,
   removeAuthToken,
+  storeAuthToken,
 } from "@/business/secure-store/AuthToken";
 import { AuthLogInAuthToken } from "@/api/routes/auth";
+import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -23,7 +25,14 @@ export default function useCachedResources() {
         if (authToken) {
           try {
             const data = await AuthLogInAuthToken(authToken);
-            if (data) setData(data);
+            if (data) {
+              setData(data);
+              console.log("Vecchio access token: ", authToken);
+              console.log("Nuovo access token: ", data.accessToken);
+
+              await storeAuthToken(data.accessToken);
+              await storeDeviceUuid(data.device.uuid);
+            }
           } catch (e) {
             await removeAuthToken();
           }

@@ -4,7 +4,7 @@ import { AuthStackScreenProps } from "@/types";
 import Container from "@/components/Container";
 import { Button, Input } from "native-base";
 import { useMutation } from "react-query";
-import { AuthValidateOtp } from "@/api/routes/auth";
+import { AuthResendOtp, AuthValidateOtp } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { login } from "@/business/redux/features/user/userSlice";
 import { storeAuthToken } from "@/business/secure-store/AuthToken";
 import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
+import useCountdown from "@bradgarropy/use-countdown";
 
 const pinLength = 6;
 
@@ -30,7 +31,16 @@ const AuthInsertOtp = ({
 
   const insets = useSafeAreaInsets();
 
-  const [resendTimer, setResendTimer] = React.useState(60);
+  const countdown = useCountdown({
+    minutes: 1,
+    seconds: 0,
+    format: "mm:ss",
+    autoStart: true,
+    onCompleted: () => setTimerEnd(true),
+  });
+
+  // For keeping a track on the Timer
+  const [timerEnd, setTimerEnd] = React.useState(false);
 
   const validateOtpMutation = useMutation(
     (data: { otp: string; sessionId: string }) =>
@@ -62,6 +72,17 @@ const AuthInsertOtp = ({
     }
   );
 
+  const resendOtpMutation = useMutation(
+    (data: { sessionId: string }) => AuthResendOtp(data.sessionId),
+    {
+      onSuccess: () => {
+        countdown.reset();
+        setTimerEnd(false);
+      },
+      onError: (error) => {},
+    }
+  );
+
   React.useEffect(() => {
     if (isLoggedIn) {
       navigation.navigate("Root", {
@@ -77,21 +98,13 @@ const AuthInsertOtp = ({
     });
   }, [navigation]);
 
-  // Creo un timer per il resend
-  React.useEffect(() => {
-    if (resendTimer > 0) {
-      setTimeout(() => {
-        setResendTimer((prev) => prev - 1);
-      }, 2000);
-    }
-  }, [resendTimer]);
-
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
         behavior={"height"}
         style={{
           flex: 1,
+          alignItems: "center",
         }}
       >
         <View style={authStyles.containerLogo}>
@@ -152,11 +165,25 @@ const AuthInsertOtp = ({
           }}
         >
           <Button
-            style={authStyles.button}
-            disabled={resendTimer > 0}
-            isLoading={validateOtpMutation.isLoading}
+            style={{
+              ...authStyles.button,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            disabled={
+              validateOtpMutation.isLoading ||
+              !timerEnd ||
+              resendOtpMutation.isLoading
+            }
+            isLoading={
+              validateOtpMutation.isLoading || resendOtpMutation.isLoading
+            }
             onPress={() => {
-              console.log("resend");
+              resendOtpMutation.mutate({
+                sessionId: userData.sessionId,
+              });
+              // refTimer.current?.restart();
             }}
           >
             <Text
@@ -164,9 +191,9 @@ const AuthInsertOtp = ({
                 ...authStyles.buttonText,
               }}
             >
-              {resendTimer > 0
-                ? "Resend in " + resendTimer + " seconds"
-                : "Resend"}
+              {timerEnd
+                ? "Resend"
+                : `Resend in ${countdown.minutes}:${countdown.seconds}`}
             </Text>
           </Button>
         </View>

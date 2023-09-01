@@ -1,6 +1,4 @@
-import { Country } from "@/models/resources/Country";
 import client, { API_URL, ErrorResponseType } from "../client";
-import { AuthDto } from "@/models/dto/Auth";
 import { ILoginResponse } from "@/models/auth/Auth";
 import { getDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import * as FileSystem from "expo-file-system";
@@ -101,6 +99,22 @@ export const AuthValidateOtp = async (
         },
       }
     );
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const AuthResendOtp = async (
+  sessionId: string
+): Promise<{
+  message: string;
+}> => {
+  try {
+    const { data } = await client.post(`${API_PATH}/resend_otp`, {
+      sessionId,
+    });
 
     return data;
   } catch (error) {

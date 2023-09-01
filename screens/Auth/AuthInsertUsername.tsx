@@ -1,9 +1,8 @@
 import React from "react";
 import Container from "@/components/Container";
-import { TextInput } from "react-native-gesture-handler";
 import { AuthStackScreenProps } from "@/types";
 import { useFocusEffect } from "@react-navigation/native";
-import { KeyboardAvoidingView, View, Text } from "react-native";
+import { KeyboardAvoidingView, View, Text, TextInput } from "react-native";
 import { authStyles } from "./AuthInsertFullName";
 import { Button, Input } from "native-base";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -69,6 +68,7 @@ const AuthInsertUsername = ({
         behavior={"height"}
         style={{
           flex: 1,
+          alignItems: "center",
         }}
       >
         <View style={authStyles.containerLogo}>

@@ -1,9 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "../features/user/userSlice";
+import socketReducer from "../features/socket/socketSlice";
+import snapSyncReducer from "../features/snapsync/snapSyncSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
+    socket: socketReducer,
+    snapSync: snapSyncReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

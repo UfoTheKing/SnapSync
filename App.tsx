@@ -19,6 +19,7 @@ import Toast from "react-native-toast-message";
 import { store } from "@/business/redux/app/store";
 import { Provider } from "react-redux";
 import useCachedResources from "@/hooks/useCachedResources";
+import { Host } from "react-native-portalize";
 
 const queryClient = new QueryClient();
 
@@ -36,8 +37,10 @@ export default function App() {
           <GestureHandlerRootView style={styles.container}>
             <NativeBaseProvider theme={theme}>
               <NavigationContainer>
-                <RootNavigation data={data} />
-                <Toast />
+                <Host>
+                  <RootNavigation data={data} />
+                  <Toast />
+                </Host>
               </NavigationContainer>
             </NativeBaseProvider>
           </GestureHandlerRootView>

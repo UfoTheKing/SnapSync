@@ -14,6 +14,11 @@ declare global {
 /* ------------------------------------------------------ ROOT ------------------------------------------------------ */
 export type RootStackParamList = {
   Root: NavigatorScreenParams<RootTabParamList> | undefined;
+  UserProfileStack:
+    | NavigatorScreenParams<UserProfileStackParamList>
+    | undefined;
+
+  SnapSyncStack: NavigatorScreenParams<SnapSyncStackParamList> | undefined;
 
   // Not Logged
   Onboarding: undefined;
@@ -73,8 +78,10 @@ export type AuthStackScreenProps<Screen extends keyof AuthStackParamList> =
 /* ------------------------------------------------------ BOTTOM TABS ------------------------------------------------------ */
 export type RootTabParamList = {
   TabHomeStack: NavigatorScreenParams<HomeStackParamList> | undefined;
-  TabFriendsStack: undefined;
-  TabUserProfileStack: undefined;
+  TabSearchStack: NavigatorScreenParams<SearchStackParamList> | undefined;
+  TabUserProfileStack:
+    | NavigatorScreenParams<UserProfileStackParamList>
+    | undefined;
 };
 export type RootTabScreenProps<Screen extends keyof RootTabParamList> =
   CompositeScreenProps<
@@ -92,3 +99,49 @@ export type HomeStackScreenProps<Screen extends keyof HomeStackParamList> =
     NativeStackScreenProps<HomeStackParamList, Screen>,
     NativeStackScreenProps<RootStackParamList>
   >;
+
+/* ------------------------------------------------------ FRIENDS AND SEARCH ------------------------------------------------------ */
+export type SearchStackParamList = {
+  Search: undefined;
+  OutgoingRequests: undefined;
+};
+
+export type SearchStackScreenProps<Screen extends keyof SearchStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<SearchStackParamList, Screen>,
+    NativeStackScreenProps<RootStackParamList>
+  >;
+/* ------------------------------------------------------ USER ------------------------------------------------------ */
+export type UserProfileStackParamList = {
+  UserProfile: {
+    fromHome: boolean;
+
+    userId: number;
+
+    username?: string;
+    profilePictureUrl?: string;
+  };
+};
+
+export type UserProfileStackScreenProps<
+  Screen extends keyof UserProfileStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<UserProfileStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+/* ------------------------------------------------------ SNAPSYNC ------------------------------------------------------ */
+export type SnapSyncStackParamList = {
+  Create: {
+    createdByMe: boolean;
+  };
+  Invite: {
+    position: string;
+  };
+};
+
+export type SnapSyncStackScreenProps<
+  Screen extends keyof SnapSyncStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<SnapSyncStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;

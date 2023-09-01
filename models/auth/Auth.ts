@@ -4,7 +4,8 @@ export interface ILoginResponse {
   user: {
     id: number;
     username: string;
-    profilePictureUrl: string | null;
+    fullName: string;
+    profilePictureUrl: string;
     biography: string | null;
     isVerified: boolean;
   };

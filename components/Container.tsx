@@ -13,6 +13,8 @@ type Props = {
   dismissKeyboardEnabled?: boolean;
 
   textCenter?: boolean;
+
+  onContainerPress?: () => void;
 };
 
 const Container = (props: Props) => {
@@ -24,6 +26,8 @@ const Container = (props: Props) => {
     safeAreaRight = true,
     dismissKeyboardEnabled = true,
     textCenter = false,
+
+    onContainerPress,
   } = props;
 
   const insets = useSafeAreaInsets();
@@ -47,6 +51,8 @@ const Container = (props: Props) => {
         if (dismissKeyboardEnabled) {
           Keyboard.dismiss();
         }
+
+        onContainerPress?.();
       }}
     >
       {props.children}

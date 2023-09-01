@@ -1,9 +1,8 @@
-import { StyleSheet, Image, View } from "react-native";
+import { StyleSheet, Image, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { HomeStackParamList, HomeStackScreenProps } from "@/types";
 import HomeScreen from "@/screens/Tabs/Home/HomeScreen";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { VStack } from "native-base";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
@@ -86,7 +85,7 @@ const TabHomeStack = (props: Props) => {
                 justifyContent: "center",
               }}
               onPress={() =>
-                navigation.navigate("Root", { screen: "TabFriendsStack" })
+                navigation.navigate("Root", { screen: "TabSearchStack" })
               }
             >
               <VStack

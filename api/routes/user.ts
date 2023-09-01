@@ -19,3 +19,28 @@ export const FetchUserProfileById = async (
     throw error;
   }
 };
+
+export const CreateUserContacts = async (
+  phoneNumbers: string[],
+  tokenApi: string
+): Promise<{
+  message: string;
+}> => {
+  try {
+    const response = await client.post(
+      `${API_PATH}/contacts`,
+      {
+        phoneNumbers,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${tokenApi}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
