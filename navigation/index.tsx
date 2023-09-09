@@ -11,6 +11,9 @@ import AuthStack from "./AuthStack";
 import { login } from "@/business/redux/features/user/userSlice";
 import UserProfileStack from "./UserProfileStack";
 import SnapSyncStack from "./SnapSyncStack";
+import { WSS_URL } from "@/api/client";
+import { WssActions } from "@/utils/wss";
+import { initWs, resetWs } from "@/business/redux/features/socket/socketSlice";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -44,6 +47,30 @@ const RootNavigation = ({ data }: Props) => {
 
     loginAuthToken();
   }, [data, isLoggedIn]);
+
+  React.useEffect(() => {
+    const ws = new WebSocket(WSS_URL);
+    ws.onopen = async () => {
+      console.log("connected to ws");
+    };
+    ws.onmessage = (e) => {
+      let data = JSON.parse(e.data);
+      if (data.action === WssActions.WssInfo && data.success) {
+        dispatch(initWs(ws));
+      }
+      // Receive a message from the server
+      // console.log(e);
+    };
+    // ws.onerror = (e) => {
+    //   // An error occurred
+    //   console.log(e.message);
+    // };
+    ws.onclose = (e) => {
+      // Connection closed
+      // console.log(e.code, e.reason);
+      dispatch(resetWs());
+    };
+  }, []);
 
   if (isLoading) return null;
 

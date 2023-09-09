@@ -9,11 +9,15 @@ import { RootState } from "@/business/redux/app/store";
 import { FetchUserFriends } from "@/api/routes/friendship";
 import { ScreenHeight } from "@/constants/Layout";
 import { instanceOfErrorResponseType } from "@/api/client";
-import InlineUser, { INLINE_USER_HEIGHT } from "@/components/InlineUser";
+import InlineUser from "@/components/InlineUser";
 import { FlashList } from "@shopify/flash-list";
 import { LightBackground } from "@/utils/theme";
-import { addUser } from "@/business/redux/features/snapsync/snapSyncSlice";
 import { SnapSyncStackScreenProps } from "@/types";
+import {
+  InvitedUser,
+  addUser,
+} from "@/business/redux/features/snapsync/snapSyncSlice";
+import { INLINE_USER_HEIGHT } from "@/components/User/styles";
 
 type Props = {};
 
@@ -110,9 +114,10 @@ const InviteScreen = ({
               rightComponent={
                 <View
                   style={{
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     height: INLINE_USER_HEIGHT,
                     justifyContent: "center",
+                    flex: 1,
                   }}
                 >
                   <Button
@@ -120,13 +125,13 @@ const InviteScreen = ({
                     size="sm"
                     rounded="full"
                     onPress={() => {
-                      dispatch(
-                        addUser({
-                          id: item.user.id,
-                          position: route.params.position,
-                          profilePictureUrl: item.user.profilePictureUrl,
-                        })
-                      );
+                      let data: InvitedUser = {
+                        id: item.user.id,
+                        position: route.params.position,
+                        profilePictureUrl: item.user.profilePictureUrl,
+                        username: item.user.username,
+                      };
+                      dispatch(addUser(data));
 
                       navigation.goBack();
                     }}

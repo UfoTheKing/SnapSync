@@ -71,7 +71,7 @@ export const theme = extendTheme({
 
 export const textColorGray = "#737373";
 
-export const LightBackground = "#f7f7f7";
+export const LightBackground = "#fff";
 
 type MyThemeType = typeof theme;
 declare module "native-base" {

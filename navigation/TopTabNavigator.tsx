@@ -12,7 +12,8 @@ import { CreateUserContacts } from "@/api/routes/user";
 import { getDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import { createWssMessage } from "@/utils/utils";
 import { WssActions } from "@/utils/wss";
-import { initWs } from "@/business/redux/features/socket/socketSlice";
+import { initWs, loginWs } from "@/business/redux/features/socket/socketSlice";
+import { WSS_URL } from "@/api/client";
 
 const Tab = createMaterialTopTabNavigator<RootTabParamList>();
 
@@ -20,6 +21,8 @@ type Props = {};
 
 const TopTabNavigator = (props: Props) => {
   const tokenApi = useSelector((state: RootState) => state.user.tokenApi);
+  const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const ws = useSelector((state: RootState) => state.socket.ws);
 
   const dispatch = useDispatch();
 
@@ -61,38 +64,64 @@ const TopTabNavigator = (props: Props) => {
     })();
   }, []);
 
-  // Mi collego al WebSocket
   useEffect(() => {
-    const ws = new WebSocket("ws://192.168.178.141:8999");
-    ws.onopen = async () => {
+    async function loginWss() {
       const deviceUuid = await getDeviceUuid();
       if (deviceUuid) {
-        let message = createWssMessage(
-          tokenApi,
-          deviceUuid,
-          WssActions.Login,
-          null
-        );
-        ws.send(message);
+        let message = createWssMessage(WssActions.Login, tokenApi, deviceUuid);
+        ws?.send(message);
       }
-    };
-    ws.onmessage = (e) => {
-      let data = JSON.parse(e.data);
-      if (data.action === WssActions.Login && data.success) {
-        dispatch(initWs(ws));
-      }
-      // Receive a message from the server
-      console.log(e);
-    };
-    // ws.onerror = (e) => {
-    //   // An error occurred
-    //   console.log(e.message);
-    // };
-    ws.onclose = (e) => {
-      // Connection closed
-      console.log(e.code, e.reason);
-    };
-  }, []);
+    }
+    if (ws && tokenApi && isLoggedIn) {
+      loginWss();
+    }
+  }, [ws, tokenApi, isLoggedIn]);
+
+  useEffect(() => {
+    if (ws) {
+      ws.onmessage = (e) => {
+        let data = JSON.parse(e.data);
+        if (data.action === WssActions.Login && data.success) {
+          dispatch(loginWs());
+        }
+        // Receive a message from the server
+        console.log(e);
+      };
+    }
+  }, [ws]);
+
+  // Mi collego al WebSocket
+  // useEffect(() => {
+  //   const ws = new WebSocket(WSS_URL);
+  //   ws.onopen = async () => {
+  //     const deviceUuid = await getDeviceUuid();
+  //     if (deviceUuid) {
+  //       let message = createWssMessage(
+  //         tokenApi,
+  //         deviceUuid,
+  //         WssActions.Login,
+  //         null
+  //       );
+  //       ws.send(message);
+  //     }
+  //   };
+  //   ws.onmessage = (e) => {
+  //     let data = JSON.parse(e.data);
+  //     if (data.action === WssActions.Login && data.success) {
+  //       dispatch(initWs(ws));
+  //     }
+  //     // Receive a message from the server
+  //     // console.log(e);
+  //   };
+  //   // ws.onerror = (e) => {
+  //   //   // An error occurred
+  //   //   console.log(e.message);
+  //   // };
+  //   ws.onclose = (e) => {
+  //     // Connection closed
+  //     // console.log(e.code, e.reason);
+  //   };
+  // }, []);
 
   return (
     <Tab.Navigator

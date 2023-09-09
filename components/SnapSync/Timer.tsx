@@ -1,30 +1,28 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import useCountdown from "@bradgarropy/use-countdown";
+import { SnapSyncTimer } from "@/models/wss/SnapSync";
 
 type Props = {
-  minutes: number;
-  seconds: number;
-
-  start: boolean;
+  timer: SnapSyncTimer;
 
   onCompleted: () => void;
 };
 
 const Timer = (props: Props) => {
-  const { minutes, seconds, start, onCompleted } = props;
+  const { timer, onCompleted } = props;
 
   const countdown = useCountdown({
-    minutes: minutes,
-    seconds: seconds,
+    minutes: timer.minutes,
+    seconds: timer.seconds,
     format: "mm:ss",
     autoStart: false,
     onCompleted: () => onCompleted(),
   });
 
   React.useEffect(() => {
-    if (start) countdown.start();
-  }, [start]);
+    if (timer.start) countdown.start();
+  }, [timer.start]);
 
   return (
     <View>

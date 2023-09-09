@@ -1,10 +1,30 @@
 import { ScreenWidth } from "@/constants/Layout";
 import { StyleSheet } from "react-native";
 
+export const SnapSyncStyles = StyleSheet.create({
+  inviteText: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: "white",
+    letterSpacing: 1,
+  },
+
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+  },
+  username: {
+    fontWeight: "bold",
+    fontSize: 12,
+    color: "white",
+  },
+});
+
 export const RectTwoStyles = StyleSheet.create({
   container: {
     width: ScreenWidth,
-    height: 500,
+    height: "100%",
     borderRadius: 20,
     flexDirection: "row",
   },

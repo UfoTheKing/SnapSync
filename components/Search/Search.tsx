@@ -7,7 +7,7 @@ import { RootState } from "@/business/redux/app/store";
 import { SearchByQuery } from "@/api/routes/searches";
 import { Button, Spinner } from "native-base";
 import { instanceOfErrorResponseType } from "@/api/client";
-import InlineUser, { INLINE_USER_HEIGHT } from "../InlineUser";
+import InlineUser from "../InlineUser";
 import { SmallUser } from "@/models/resources/User";
 import { LightBackground } from "@/utils/theme";
 import {
@@ -15,6 +15,7 @@ import {
   CreateFriendship,
   DeleteFriendship,
 } from "@/api/routes/friendship";
+import { INLINE_USER_HEIGHT } from "../User/styles";
 
 type Props = {
   query: string;
@@ -187,16 +188,16 @@ const Search = (props: Props) => {
                       mt={10}
                       bgc={LightBackground}
                       rightComponent={
-                        item.showAcceptButton !== undefined &&
-                        item.showAcceptButton ? (
-                          <View
-                            style={{
-                              alignItems: "center",
-                              height: INLINE_USER_HEIGHT,
-                              marginRight: 30,
-                              justifyContent: "center",
-                            }}
-                          >
+                        <View
+                          style={{
+                            alignItems: "flex-end",
+                            height: INLINE_USER_HEIGHT,
+                            // marginRight: 30,
+                            justifyContent: "center",
+                            flex: 1,
+                          }}
+                        >
+                          {item.showAcceptButton ? (
                             <Button
                               colorScheme="primary"
                               size="sm"
@@ -216,17 +217,7 @@ const Search = (props: Props) => {
                             >
                               Accept
                             </Button>
-                          </View>
-                        ) : item.showAddButton !== undefined &&
-                          item.showAddButton ? (
-                          <View
-                            style={{
-                              alignItems: "center",
-                              height: INLINE_USER_HEIGHT,
-                              marginRight: 30,
-                              justifyContent: "center",
-                            }}
-                          >
+                          ) : item.showAddButton ? (
                             <Button
                               colorScheme="secondary"
                               size="sm"
@@ -245,17 +236,7 @@ const Search = (props: Props) => {
                             >
                               Add
                             </Button>
-                          </View>
-                        ) : item.showRemoveButton !== undefined &&
-                          item.showRemoveButton ? (
-                          <View
-                            style={{
-                              alignItems: "center",
-                              height: INLINE_USER_HEIGHT,
-                              marginRight: 30,
-                              justifyContent: "center",
-                            }}
-                          >
+                          ) : item.showRemoveButton ? (
                             <Button
                               colorScheme="error"
                               size="sm"
@@ -274,8 +255,8 @@ const Search = (props: Props) => {
                             >
                               Unfriend
                             </Button>
-                          </View>
-                        ) : null
+                          ) : null}
+                        </View>
                       }
                     />
                   );

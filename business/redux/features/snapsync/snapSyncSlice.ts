@@ -1,78 +1,72 @@
-import { Shape } from "@/models/project/Shape";
+import { SnapSyncData } from "@/models/wss/SnapSync";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-export interface SnapSyncUser {
+export interface InvitedUser {
   id: number;
   position: string;
   profilePictureUrl: string;
-
-  joined: boolean;
+  username: string;
 }
 
 export interface SnapSyncState {
-  shape: Shape | null;
-  users: Array<SnapSyncUser>;
-
-  key: string | null;
+  snapSync: SnapSyncData | null;
+  createdByMe: boolean;
+  invitedUsers: InvitedUser[];
 }
 
 const initialState: SnapSyncState = {
-  shape: null,
-  users: [],
-
-  key: null,
+  snapSync: null,
+  createdByMe: false,
+  invitedUsers: [],
 };
 
 export const snapSyncSlice = createSlice({
   name: "snapsync",
   initialState,
   reducers: {
-    initShape: (state, action: PayloadAction<Shape>) => {
-      state.shape = action.payload;
+    initSnapSyncData: (
+      state,
+      action: PayloadAction<{
+        snapSync: SnapSyncData;
+        createdByMe: boolean;
+      }>
+    ) => {
+      state.snapSync = action.payload.snapSync;
+      state.createdByMe = action.payload.createdByMe;
     },
-    changeShape: (state, action: PayloadAction<Shape>) => {
-      state.users = [];
-      state.shape = action.payload;
+    updateSnapSyncData: (state, action: PayloadAction<SnapSyncData>) => {
+      state.snapSync = action.payload;
     },
-    addUser: (state, action: PayloadAction<SnapSyncUser>) => {
-      state.users.push(action.payload);
-    },
-    removeUser: (state, action: PayloadAction<{ id: number }>) => {
-      state.users = state.users.filter((user) => user.id !== action.payload.id);
-    },
-    resetUsers: (state) => {
-      state.users = [];
-    },
-    joinUser: (state, action: PayloadAction<{ id: number }>) => {
-      state.users = state.users.map((user) => {
-        if (user.id === action.payload.id) {
-          return {
-            ...user,
-            joined: true,
-          };
-        }
-        return user;
-      });
-    },
+    addUser: (state, action: PayloadAction<InvitedUser>) => {
+      // Verifico se esiste già un utente con lo stesso id
+      const user = state.invitedUsers.find(
+        (user) => user.id === action.payload.id
+      );
 
-    initSnapInstanceKey: (state, action: PayloadAction<string>) => {
-      state.key = action.payload;
+      if (!user) {
+        // Verifico se esiste un utente nella stessa posizione
+        const userInSamePosition = state.invitedUsers.find(
+          (user) => user.position === action.payload.position
+        );
+
+        if (userInSamePosition) {
+          // Se esiste, lo rimuovo
+          state.invitedUsers = state.invitedUsers.filter(
+            (user) => user.position !== action.payload.position
+          );
+        }
+
+        // Aggiungo l'utente
+        state.invitedUsers.push(action.payload);
+      }
     },
 
     reset: () => initialState,
   },
 });
 
-export const {
-  initShape,
-  addUser,
-  removeUser,
-  reset,
-  resetUsers,
-  joinUser,
-  initSnapInstanceKey,
-  changeShape,
-} = snapSyncSlice.actions;
+export const { initSnapSyncData, updateSnapSyncData, addUser, reset } =
+  snapSyncSlice.actions;
 
 export default snapSyncSlice.reducer;

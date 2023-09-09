@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
@@ -6,13 +6,13 @@ import { useInfiniteQuery, useMutation, useQueryClient } from "react-query";
 import { DeleteFriendship, FetchUserFriends } from "@/api/routes/friendship";
 import Container from "@/components/Container";
 import { FlashList } from "@shopify/flash-list";
-import InlineUser, { INLINE_USER_HEIGHT } from "@/components/InlineUser";
+import InlineUser from "@/components/InlineUser";
 import { LightBackground } from "@/utils/theme";
 import { Button, Divider, Spinner, useTheme } from "native-base";
 import { ScreenHeight } from "@/constants/Layout";
 import { instanceOfErrorResponseType } from "@/api/client";
-import { AntDesign } from "@expo/vector-icons";
 import { SmallUser } from "@/models/resources/User";
+import { INLINE_USER_HEIGHT } from "@/components/User/styles";
 
 type Props = {
   onPressUsername?: (user: SmallUser) => void;
@@ -116,9 +116,10 @@ const FriendsRoute = (props: Props) => {
               rightComponent={
                 <View
                   style={{
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     height: INLINE_USER_HEIGHT,
                     justifyContent: "center",
+                    flex: 1,
                   }}
                 >
                   <Button

@@ -24,6 +24,7 @@ const TabSearchStack = () => {
             headerShown: true,
             headerBackVisible: false,
             headerTitle: "Requests Sent",
+            headerTitleAlign: "center",
           }}
         />
       </Stack.Group>

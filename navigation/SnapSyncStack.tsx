@@ -1,8 +1,8 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SnapSyncStackParamList } from "@/types";
-import CreateScreen from "@/screens/SnapSync/CreateScreen";
 import InviteScreen from "@/screens/SnapSync/InviteScreen";
+import SnapSyncScreen from "@/screens/SnapSync/SnapSyncScreen";
 
 type Props = {};
 
@@ -18,8 +18,8 @@ const SnapSyncStack = (props: Props) => {
       }}
     >
       <Stack.Screen
-        name="Create"
-        component={CreateScreen}
+        name="SnapSync"
+        component={SnapSyncScreen}
         options={{
           gestureEnabled: false,
         }}

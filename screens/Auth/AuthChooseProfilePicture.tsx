@@ -158,17 +158,22 @@ const AuthChooseProfilePicture = ({
     }
   };
 
+  // TODO: Capire perche il bottono non è centrato
   if (imageToUse) {
     return (
       <Container>
         <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
         >
           <Image
             source={{ uri: imageToUse }}
             style={{
-              width: 360,
-              height: 360,
+              width: ScreenWidth / 2,
+              height: ScreenWidth / 2,
               borderRadius: 180,
             }}
           />

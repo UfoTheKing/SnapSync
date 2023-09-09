@@ -308,9 +308,10 @@ const styles = StyleSheet.create({
     color: "#c7c7c7",
   },
   helpText: {
-    fontSize: 12,
+    fontSize: 8,
     fontWeight: "normal",
     color: "#000",
     marginBottom: 10,
+    textAlign: "center",
   },
 });

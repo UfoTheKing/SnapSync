@@ -4,6 +4,7 @@ import { UserProfileStackParamList } from "@/types";
 import { useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
 import UserProfileSceen from "@/screens/UserProfile/UserProfileSceen";
+import FriendsListScreen from "@/screens/UserProfile/FriendsListScreen";
 
 type Props = {};
 
@@ -28,6 +29,8 @@ const UserProfileStack = (props: Props) => {
           userId: user!.id,
         }}
       />
+
+      <Stack.Screen name="FriendsList" component={FriendsListScreen} />
     </Stack.Navigator>
   );
 };

@@ -10,7 +10,7 @@ import {
 } from "@/api/routes/friendship";
 import { instanceOfErrorResponseType } from "@/api/client";
 import Container from "@/components/Container";
-import InlineUser, { INLINE_USER_HEIGHT } from "@/components/InlineUser";
+import InlineUser from "@/components/InlineUser";
 import { LightBackground } from "@/utils/theme";
 import { FlashList } from "@shopify/flash-list";
 import { Button, Divider, Spinner, useTheme } from "native-base";
@@ -18,6 +18,7 @@ import { Entypo } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { ScreenHeight } from "@/constants/Layout";
 import { SmallUser } from "@/models/resources/User";
+import { INLINE_USER_HEIGHT } from "@/components/User/styles";
 
 type Props = {
   onPressOutgoingRequests?: () => void;
@@ -183,7 +184,6 @@ const PendingRoute = (props: Props) => {
               profilePictureUrl={item.user.profilePictureUrl}
               isVerified={item.user.isVerified}
               ph={15}
-              bgc={LightBackground}
               contact={item.user.isContact}
               showContact={true}
               rightComponent={
@@ -191,7 +191,9 @@ const PendingRoute = (props: Props) => {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
+                    justifyContent: "flex-end",
                     height: INLINE_USER_HEIGHT,
+                    flex: 1,
                   }}
                 >
                   <Button

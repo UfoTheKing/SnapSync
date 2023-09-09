@@ -1,10 +1,9 @@
-import { FriendshipStatus } from "../resources/User";
-
 export interface MutualFriends {
   count: number;
   nodes: Array<{
     id: number;
     username: string;
+    fullName: string | null;
     isVerified: boolean;
     profilePictureUrl: string;
   }>;
@@ -33,6 +32,8 @@ export interface UserProfile {
   mutualFriends?: MutualFriends;
 
   friendsCount: number;
+  snapsCount: number;
 
   isMyProfile: boolean;
+  isPrivate: boolean;
 }

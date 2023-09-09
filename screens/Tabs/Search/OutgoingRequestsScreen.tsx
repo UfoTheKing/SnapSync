@@ -11,17 +11,20 @@ import { instanceOfErrorResponseType } from "@/api/client";
 import { Button } from "native-base";
 import Container from "@/components/Container";
 import { FlashList } from "@shopify/flash-list";
-import InlineUser, { INLINE_USER_HEIGHT } from "@/components/InlineUser";
+import InlineUser from "@/components/InlineUser";
 import { LightBackground } from "@/utils/theme";
 import { Divider, Spinner } from "native-base";
 import { ScreenHeight } from "@/constants/Layout";
+import { INLINE_USER_HEIGHT } from "@/components/User/styles";
+import { SearchStackScreenProps } from "@/types";
 
 type Props = {};
 
-const OutgoingRequestsScreen = (props: Props) => {
+const OutgoingRequestsScreen = ({
+  navigation,
+}: SearchStackScreenProps<"OutgoingRequests">) => {
   const tokenApi = useSelector((state: RootState) => state.user.tokenApi);
   const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
-
   const destroyFriendshipMutation = useMutation(
     (userId: number) => DeleteFriendship(userId, tokenApi),
     {
@@ -120,9 +123,10 @@ const OutgoingRequestsScreen = (props: Props) => {
               rightComponent={
                 <View
                   style={{
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     height: INLINE_USER_HEIGHT,
                     justifyContent: "center",
+                    flex: 1,
                   }}
                 >
                   <Button

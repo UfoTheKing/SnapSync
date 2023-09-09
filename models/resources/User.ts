@@ -10,6 +10,7 @@ export interface User {
   biography: string | null;
 
   isVerified: boolean;
+  isPrivate: boolean;
 }
 
 export interface FriendshipStatus {

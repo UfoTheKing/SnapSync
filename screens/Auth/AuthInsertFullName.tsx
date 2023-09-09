@@ -145,6 +145,7 @@ const AuthInsertFullName = ({
           style={{
             ...authStyles.buttonContainer,
             bottom: insets.bottom,
+            justifyContent: "flex-start",
           }}
         >
           <Button

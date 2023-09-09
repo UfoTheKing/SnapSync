@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "340549609345",
+    "project_id": "snapsync-398312",
+    "storage_bucket": "snapsync-398312.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340549609345:android:a22e8131535a29d6682a80",
+        "android_client_info": {
+          "package_name": "com.snapsync.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "340549609345-7d2u9snvsdtfms09mpiucal8nf87pp78.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzSsXjV6uDZmiiyrlLNLqYYYTY0y6ss5A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340549609345-7d2u9snvsdtfms09mpiucal8nf87pp78.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

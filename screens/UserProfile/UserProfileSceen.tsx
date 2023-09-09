@@ -1,9 +1,17 @@
-import { StyleSheet, Text, View, Image } from "react-native";
-import React from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
+import React, { useCallback, useMemo, useRef } from "react";
 import { UserProfileStackScreenProps } from "@/types";
 import Container from "@/components/Container";
 import { useMutation, useQuery, useQueryClient } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
 import { FetchUserProfileById } from "@/api/routes/user";
 import {
@@ -13,13 +21,25 @@ import {
   ShowFriendship,
 } from "@/api/routes/friendship";
 import { useFocusEffect } from "@react-navigation/native";
-import GoBackButton from "@/components/GoBackButton";
+import GoBackButton, { GO_BACK_BUTTON_DARK } from "@/components/GoBackButton";
 import { Skeleton, useTheme } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { LightBackground } from "@/utils/theme";
 import Biography from "@/components/UserProfile/Biography";
 import Friendship from "@/components/UserProfile/Friendship";
 import { instanceOfErrorResponseType } from "@/api/client";
+import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
+import CustomBackdrop from "@/components/BottomSheetModal/CustomBackdrop";
+import BottomSheetModalItem from "@/components/BottomSheetModal/BottomSheetModalItem";
+import { BiographyEntity } from "@/models/project/UserProfile";
+import Counter from "../../components/UserProfile/Counter";
+import MutualFriends from "@/components/UserProfile/MutualFriends";
+import { AuthLogOut } from "@/api/routes/auth";
+import { removeAuthToken } from "@/business/secure-store/AuthToken";
+import { resetWs } from "@/business/redux/features/socket/socketSlice";
+import { logout } from "@/business/redux/features/user/userSlice";
+import AntDesignButton from "@/components/AntDesignButton";
+import { AntDesign } from "@expo/vector-icons";
 
 type Props = {};
 
@@ -36,6 +56,51 @@ const UserProfileSceen = ({
   const queryClient = useQueryClient();
 
   const colors = useTheme().colors;
+
+  const dispatch = useDispatch();
+
+  const { dismissAll } = useBottomSheetModal();
+
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const bottomSheetModalOtherUserRef = useRef<BottomSheetModal>(null);
+
+  const snapPoints = useMemo(() => ["50%", "80%"], []);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleDismissModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+  }, []);
+  const renderBackdrop = React.useCallback(
+    (props: any) => (
+      <CustomBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        onPress={handleDismissModalPress}
+      />
+    ),
+    []
+  );
+
+  const handlePresentModalPressOtherUser = useCallback(() => {
+    bottomSheetModalOtherUserRef.current?.present();
+  }, []);
+  const handleDismissModalPressOtherUser = useCallback(() => {
+    bottomSheetModalOtherUserRef.current?.dismiss();
+  }, []);
+  const renderBackdropOtherUser = React.useCallback(
+    (props: any) => (
+      <CustomBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        onPress={handleDismissModalPressOtherUser}
+      />
+    ),
+    []
+  );
 
   const acceptFriendRequestMutation = useMutation(
     (userId: number) => AcceptFriendship(userId, tokenApi),
@@ -106,11 +171,21 @@ const UserProfileSceen = ({
     }
   );
 
+  const logOutMutation = useMutation(() => AuthLogOut(tokenApi), {
+    onSuccess: (data) => {
+      console.log("logout success");
+      clearGlobalCache();
+    },
+    onError: (error) => {},
+  });
+
   const {
     data: userProfile,
     error: userProfileError,
     isLoading: userProfileIsLoading,
     isError: userProfileIsError,
+    refetch: userProfileRefetch,
+    isRefetching: userProfileIsRefetching,
   } = useQuery(
     ["user", userId, "profile", tokenApi],
     () => FetchUserProfileById(userId, tokenApi),
@@ -158,9 +233,29 @@ const UserProfileSceen = ({
         />
       ),
       headerTitle: () => (
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 14, marginRight: 4 }}>
-            {userProfile ? userProfile.username : username}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontWeight: "500",
+              fontSize: 16,
+              lineHeight: 28,
+              marginRight: 4,
+            }}
+          >
+            {userProfile
+              ? userProfile.username.length > 25
+                ? userProfile.username.slice(0, 25) + "..."
+                : userProfile.username
+              : username
+              ? username.length > 25
+                ? username.slice(0, 25) + "..."
+                : username
+              : ""}
           </Text>
           {userProfile && userProfile.isVerified && (
             <Ionicons
@@ -172,8 +267,63 @@ const UserProfileSceen = ({
           )}
         </View>
       ),
+      headerTitleAlign: "center",
+      headerRight: () => {
+        if (!userProfile) return null;
+
+        return (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {friendshipsStatus ? (
+              <TouchableOpacity style={{ marginRight: 8 }}>
+                {friendshipsStatus.isBlocking ? (
+                  <Ionicons
+                    name="lock-closed"
+                    size={24}
+                    color={colors.primary[900]}
+                  />
+                ) : friendshipsStatus.isFriend ? (
+                  <Ionicons
+                    name="people"
+                    size={24}
+                    color={colors.primary[900]}
+                  />
+                ) : friendshipsStatus.incomingRequest ? (
+                  <Ionicons
+                    name="person-add"
+                    size={24}
+                    color={colors.primary[900]}
+                  />
+                ) : friendshipsStatus.outgoingRequest ? (
+                  <Ionicons
+                    name="person-add-outline"
+                    size={24}
+                    color={colors.primary[900]}
+                  />
+                ) : null}
+              </TouchableOpacity>
+            ) : null}
+            <AntDesignButton
+              onPress={() => {
+                dismissAll();
+                if (userProfile.isMyProfile) {
+                  handlePresentModalPress();
+                } else {
+                  handlePresentModalPressOtherUser();
+                }
+              }}
+              name="ellipsis1"
+            />
+          </View>
+        );
+      },
     });
-  }, [userProfile, navigation, username, fromHome]);
+  }, [userProfile, navigation, username, fromHome, friendshipsStatus]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -183,71 +333,239 @@ const UserProfileSceen = ({
     }, [userProfile])
   );
 
+  const clearGlobalCache = async () => {
+    queryClient.clear();
+    await removeAuthToken();
+
+    dispatch(resetWs());
+    dispatch(logout());
+  };
+
   if (userProfileIsError) {
     return (
-      <Container textCenter>
-        <Text style={{ fontSize: 12, fontWeight: "bold" }}>
-          {userProfileError && instanceOfErrorResponseType(userProfileError)
-            ? userProfileError.message
-            : "An error occured"}
-        </Text>
+      <Container>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={userProfileIsRefetching}
+              onRefresh={() => {
+                userProfileRefetch();
+                friendshipsStatusRefetch();
+              }}
+            />
+          }
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ fontSize: 12, fontWeight: "bold" }}>
+            {userProfileError && instanceOfErrorResponseType(userProfileError)
+              ? userProfileError.message
+              : "An error occured"}
+          </Text>
+        </ScrollView>
       </Container>
     );
   }
 
+  // console.log(JSON.stringify(userProfile, null, 2));
+
+  const handlePressEntity = (entity: BiographyEntity) => {
+    if (entity.type === "user") {
+      navigation.push("UserProfile", {
+        userId: entity.id,
+        fromHome: false,
+        username: entity.text,
+      });
+    }
+  };
+
   return (
     <Container safeAreaTop={false}>
-      <View style={styles.headerContainer}>
-        {userProfileIsLoading || userProfileIsError || !userProfile ? (
-          profilePictureUrl ? (
-            <Image source={{ uri: profilePictureUrl }} style={styles.avatar} />
-          ) : user && user.id === userId ? (
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={userProfileIsRefetching}
+            onRefresh={() => {
+              userProfileRefetch();
+              // friendshipsStatusRefetch();
+            }}
+          />
+        }
+      >
+        <View style={styles.headerContainer}>
+          {userProfileIsLoading || userProfileIsError || !userProfile ? (
+            profilePictureUrl ? (
+              <Image
+                source={{ uri: profilePictureUrl }}
+                style={styles.avatar}
+              />
+            ) : user && user.id === userId ? (
+              <Image
+                source={{ uri: user.profilePictureUrl }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Skeleton width={100} height={100} rounded="full" />
+            )
+          ) : (
             <Image
-              source={{ uri: user.profilePictureUrl }}
+              source={{ uri: userProfile.profilePictureUrl }}
               style={styles.avatar}
             />
-          ) : (
-            <Skeleton width={100} height={100} rounded="full" />
-          )
-        ) : (
-          <Image
-            source={{ uri: userProfile.profilePictureUrl }}
-            style={styles.avatar}
-          />
-        )}
-        <View style={styles.fullNameContainer}>
-          {userProfileIsLoading ? (
-            <Skeleton width={200} height={5} rounded={5} />
-          ) : (
-            <Text style={styles.fullName}>{userProfile?.fullName}</Text>
           )}
-        </View>
-        <View style={styles.bioContainer}>
-          <Biography
-            bio={userProfile?.biography || null}
-            onPressEntity={(entity) => {}}
+          <View style={styles.fullNameContainer}>
+            {userProfileIsLoading ? (
+              <Skeleton width={200} height={5} rounded={5} />
+            ) : (
+              <Text style={styles.fullName}>{userProfile?.fullName}</Text>
+            )}
+          </View>
+          <View style={styles.bioContainer}>
+            <Biography
+              bio={userProfile?.biography || null}
+              onPressEntity={handlePressEntity}
+            />
+          </View>
+          <Counter
+            friends={userProfile?.friendsCount || 0}
+            snaps={userProfile?.snapsCount || 0}
+            onPressFriends={() => {
+              if (userProfile) {
+                navigation.push("FriendsList", {
+                  userId: userProfile.id,
+                  username: userProfile.username,
+                  isVerified: userProfile.isVerified,
+                });
+              }
+            }}
+            disabledFriends={
+              userProfile && friendshipsStatus
+                ? userProfile.isMyProfile ||
+                  friendshipsStatus.isBlocking ||
+                  (userProfile.isPrivate && !friendshipsStatus.isFriend)
+                  ? true
+                  : false
+                : true
+            }
+          />
+          <MutualFriends
+            mutualFriends={userProfile?.mutualFriends}
+            username={userProfile?.username}
           />
         </View>
-        {userProfile ? (
-          !userProfile.isMyProfile ? (
-            <Friendship
-              friendshipStatus={friendshipsStatus}
-              isLoading={friendshipsStatusIsLoading}
-              isRefetching={friendshipsStatusIsRefetching}
-              fullName={userProfile.fullName}
-              accept={() => {
-                acceptFriendRequestMutation.mutate(userProfile.id);
-              }}
-              reject={() => {
-                rejectFriendRequestMutation.mutate(userProfile.id);
-              }}
-              destroy={() => {
-                destroyFriendshipMutation.mutate(userProfile.id);
-              }}
-            />
-          ) : null
-        ) : null}
-      </View>
+        <View style={styles.snapsContainer}>
+          {friendshipsStatus &&
+          userProfile &&
+          !userProfile.isMyProfile &&
+          (friendshipsStatus.isBlocking ||
+            (userProfile.isPrivate && !friendshipsStatus.isFriend)) ? (
+            <View style={styles.privateAndBlockedContainer}>
+              <View style={styles.circleIcon}>
+                <AntDesign name="lock" size={32} color="black" />
+              </View>
+              <Text style={styles.textTitle}>
+                {friendshipsStatus.isBlocking
+                  ? "User blocked"
+                  : "This account is private"}
+              </Text>
+              <Text
+                style={[
+                  styles.textSubtitle,
+                  {
+                    color: colors.gray[500],
+                  },
+                ]}
+              >
+                {friendshipsStatus.isBlocking
+                  ? "You can't see this user's snaps"
+                  : `You and ${userProfile.username} must be friends to see their snaps`}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </ScrollView>
+
+      {userProfile ? (
+        userProfile.isMyProfile ? (
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            backdropComponent={renderBackdrop}
+          >
+            <View style={{ flex: 1, backgroundColor: "#fff" }}>
+              <BottomSheetModalItem
+                label="Settings and privacy"
+                onPress={() => {}}
+                // icon={<Ionicons name="settings" size={16} color="black" />}
+                bottomDivider
+              />
+              <BottomSheetModalItem
+                label="Edit profile"
+                onPress={() => {}}
+                // icon={
+                //   <MaterialCommunityIcons
+                //     name="account-edit"
+                //     size={16}
+                //     color="black"
+                //   />
+                // }
+                bottomDivider
+              />
+              <BottomSheetModalItem
+                label="Log out"
+                onPress={() => logOutMutation.mutate()}
+                // icon={
+                //   <MaterialCommunityIcons name="logout" size={16} color="black" />
+                // }
+              />
+            </View>
+          </BottomSheetModal>
+        ) : (
+          <>
+            <BottomSheetModal
+              ref={bottomSheetModalOtherUserRef}
+              index={0}
+              snapPoints={snapPoints}
+              backdropComponent={renderBackdropOtherUser}
+            >
+              <View style={{ flex: 1, backgroundColor: "#fff" }}>
+                <BottomSheetModalItem
+                  label="Report"
+                  onPress={() => {}}
+                  // icon={<Ionicons name="settings" size={16} color="black" />}
+                  bottomDivider
+                />
+                <BottomSheetModalItem
+                  label="Block"
+                  onPress={() => {}}
+                  // icon={
+                  //   <MaterialCommunityIcons
+                  //     name="account-edit"
+                  //     size={16}
+                  //     color="black"
+                  //   />
+                  // }
+                  bottomDivider
+                />
+                <BottomSheetModalItem
+                  label="Copy profile URL"
+                  onPress={() => {}}
+                  // icon={
+                  //   <MaterialCommunityIcons name="logout" size={16} color="black" />
+                  // }
+                />
+              </View>
+            </BottomSheetModal>
+          </>
+        )
+      ) : null}
     </Container>
   );
 };
@@ -256,10 +574,8 @@ export default UserProfileSceen;
 
 const styles = StyleSheet.create({
   headerContainer: {
-    justifyContent: "center",
     marginTop: 8,
     alignItems: "center",
-    // backgroundColor: "red",
     paddingHorizontal: 16,
   },
   avatar: {
@@ -272,9 +588,40 @@ const styles = StyleSheet.create({
   },
   fullName: {
     fontWeight: "bold",
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 24,
   },
   bioContainer: {
     marginTop: 8,
+  },
+
+  snapsContainer: {
+    // backgroundColor: "blue",
+  },
+  privateAndBlockedContainer: {
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  circleIcon: {
+    width: 75,
+    height: 75,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#c2c2c2",
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  textTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+    color: "#000",
+  },
+  textSubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 20,
   },
 });

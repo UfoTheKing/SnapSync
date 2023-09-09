@@ -1,10 +1,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthDto } from "@/models/dto/Auth";
-import {
+import { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import type {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from "@react-navigation/native";
-import { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 
 declare global {
   namespace ReactNavigation {
@@ -121,6 +121,12 @@ export type UserProfileStackParamList = {
     username?: string;
     profilePictureUrl?: string;
   };
+
+  FriendsList: {
+    userId: number;
+    username: string;
+    isVerified: boolean;
+  };
 };
 
 export type UserProfileStackScreenProps<
@@ -131,8 +137,9 @@ export type UserProfileStackScreenProps<
 >;
 /* ------------------------------------------------------ SNAPSYNC ------------------------------------------------------ */
 export type SnapSyncStackParamList = {
-  Create: {
-    createdByMe: boolean;
+  SnapSync: {
+    mode: "create" | "join";
+    key?: string;
   };
   Invite: {
     position: string;

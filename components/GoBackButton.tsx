@@ -2,22 +2,25 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 
-type Props = {
+export type GoBackButtonProps = {
   mode?: "light" | "dark";
   onPress: () => void;
   disabled?: boolean;
 };
 
-const GoBackButton = (props: Props) => {
+export const GO_BACK_BUTTON_LIGHT = "rgba(173, 191, 255, 0.3)";
+export const GO_BACK_BUTTON_DARK = "#2A3341";
+
+const GoBackButton = (props: GoBackButtonProps) => {
   const { mode = "dark", onPress, disabled = false } = props;
 
   return (
     <TouchableOpacity
       style={[
-        styles.button,
+        GoBackButtonStyles.button,
         {
           backgroundColor:
-            mode === "light" ? "rgba(173, 191, 255, 0.3)" : "#2A3341",
+            mode === "light" ? GO_BACK_BUTTON_LIGHT : GO_BACK_BUTTON_DARK,
         },
       ]}
       onPress={onPress}
@@ -34,7 +37,7 @@ const GoBackButton = (props: Props) => {
 
 export default GoBackButton;
 
-const styles = StyleSheet.create({
+export const GoBackButtonStyles = StyleSheet.create({
   button: {
     width: 40,
     height: 40,

@@ -4,23 +4,32 @@ import { RectTwoStyles } from "../styles";
 import { Shape } from "@/models/project/Shape";
 import FullLeft from "./FullLeft";
 import FullRight from "./FullRight";
-import { useSelector } from "react-redux";
-import { RootState } from "@/business/redux/app/store";
+import { CameraType, FlashMode } from "expo-camera";
+import { Positions } from "@/utils/positions";
 
 type Props = {
   shape: Shape;
   onPressInvite: (position: string) => void;
+
+  cameraType: CameraType;
+  flashMode: FlashMode;
+
+  isTimerCompleted: boolean;
 };
 
 const RectTwo = (props: Props) => {
-  const users = useSelector((state: RootState) => state.snapSync.users);
-
   return (
     <View style={RectTwoStyles.container}>
-      <FullLeft />
+      <FullLeft
+        cameraType={props.cameraType}
+        flashMode={props.flashMode}
+        isTimerCompleted={props.isTimerCompleted}
+        onPictureTaken={(uri) => {
+          console.log("uri", uri);
+        }}
+      />
       <FullRight
-        onPressInvite={() => props.onPressInvite("FULL_RIGHT")}
-        user={users.find((user) => user.position === "FULL_RIGHT")}
+        onPressInvite={() => props.onPressInvite(Positions.FullRight)}
       />
     </View>
   );

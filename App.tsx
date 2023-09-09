@@ -21,6 +21,8 @@ import { Provider } from "react-redux";
 import useCachedResources from "@/hooks/useCachedResources";
 import { Host } from "react-native-portalize";
 
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -38,8 +40,10 @@ export default function App() {
             <NativeBaseProvider theme={theme}>
               <NavigationContainer>
                 <Host>
-                  <RootNavigation data={data} />
-                  <Toast />
+                  <BottomSheetModalProvider>
+                    <RootNavigation data={data} />
+                    <Toast />
+                  </BottomSheetModalProvider>
                 </Host>
               </NavigationContainer>
             </NativeBaseProvider>

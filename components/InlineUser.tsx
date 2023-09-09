@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import React from "react";
 import { ScreenWidth } from "@/constants/Layout";
-import { Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "native-base";
-import { AntDesign } from "@expo/vector-icons";
+import Avatar from "./User/Avatar";
+import Info from "./User/Info";
+import { INLINE_USER_HEIGHT } from "./User/styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = {
   username: string;
@@ -24,9 +24,6 @@ type Props = {
   showContact?: boolean;
 };
 
-export const INLINE_USER_HEIGHT = 48;
-export const AVATAR_SIZE = 42;
-
 const InlineUser = (props: Props) => {
   const {
     username,
@@ -44,7 +41,7 @@ const InlineUser = (props: Props) => {
     showContact = false,
   } = props;
 
-  const colors = useTheme().colors;
+  const insets = useSafeAreaInsets();
 
   return (
     <TouchableOpacity onPress={onPress} disabled={disabled}>
@@ -55,53 +52,16 @@ const InlineUser = (props: Props) => {
         ]}
       >
         <View style={styles.boxUserInfos}>
-          <View style={styles.boxUserAvatar}>
-            <Image
-              source={{ uri: profilePictureUrl }}
-              style={{ ...StyleSheet.absoluteFillObject, borderRadius: 100 }}
-            />
-          </View>
-          <View style={styles.boxUserInfo}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <Text style={{ fontWeight: "bold", fontSize: 14 }}>
-                {username}
-              </Text>
-              {isVerified ? (
-                <Ionicons
-                  name="checkmark-circle"
-                  size={16}
-                  color={colors.primary[900]}
-                  style={{ marginLeft: 4 }}
-                />
-              ) : (
-                <></>
-              )}
-            </View>
-            <Text style={{ fontSize: 12, color: colors.gray[500] }}>
-              {fullName}
-            </Text>
-            {contact && showContact ? (
-              <View style={styles.boxFromMyContacts}>
-                <AntDesign name="contacts" size={8} color={colors.gray[500]} />
-                <Text
-                  style={{
-                    fontSize: 10,
-                    color: colors.gray[500],
-                    marginLeft: 4,
-                  }}
-                >
-                  Contact
-                </Text>
-              </View>
-            ) : null}
-          </View>
+          <Avatar profilePictureUrl={profilePictureUrl} />
+          <Info
+            username={username}
+            fullName={fullName}
+            isVerified={isVerified}
+            isContact={contact}
+            showContact={showContact}
+          />
         </View>
-        {props.rightComponent ? props.rightComponent : <></>}
+        <View style={styles.boxRightComponent}>{props.rightComponent}</View>
       </View>
     </TouchableOpacity>
   );
@@ -111,31 +71,21 @@ export default InlineUser;
 
 const styles = StyleSheet.create({
   container: {
-    width: ScreenWidth,
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     height: INLINE_USER_HEIGHT,
   },
   boxUserInfos: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 5,
+    // padding: 5,
+    flex: 2,
+    height: INLINE_USER_HEIGHT,
+    // backgroundColor: "blue",
   },
-  boxUserAvatar: {
-    width: AVATAR_SIZE,
-    height: AVATAR_SIZE,
-    borderRadius: 100,
-  },
-  boxUserInfo: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    marginLeft: 12,
-  },
-  boxFromMyContacts: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+  boxRightComponent: {
+    height: INLINE_USER_HEIGHT,
+    flex: 1,
   },
 });

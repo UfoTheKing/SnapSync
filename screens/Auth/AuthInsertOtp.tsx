@@ -1,4 +1,10 @@
-import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 import { AuthStackScreenProps } from "@/types";
 import Container from "@/components/Container";
@@ -164,6 +170,13 @@ const AuthInsertOtp = ({
             bottom: insets.bottom,
           }}
         >
+          <TouchableOpacity
+            onPress={() => {
+              // TODO: Forzare il cambio del numero di telefono
+            }}
+          >
+            <Text style={styles.helpText}>Change phone number</Text>
+          </TouchableOpacity>
           <Button
             style={{
               ...authStyles.button,
@@ -204,4 +217,12 @@ const AuthInsertOtp = ({
 
 export default AuthInsertOtp;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  helpText: {
+    fontSize: 8,
+    fontWeight: "normal",
+    color: "#000",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+});
