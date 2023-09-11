@@ -25,17 +25,20 @@ import GoBackButton, { GO_BACK_BUTTON_DARK } from "@/components/GoBackButton";
 import { Skeleton, useTheme } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
 import { LightBackground } from "@/utils/theme";
-import Biography from "@/components/UserProfile/Biography";
+import Biography from "@/components/UserProfile/Biography/Biography";
 import Friendship from "@/components/UserProfile/Friendship";
 import { instanceOfErrorResponseType } from "@/api/client";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import CustomBackdrop from "@/components/BottomSheetModal/CustomBackdrop";
 import BottomSheetModalItem from "@/components/BottomSheetModal/BottomSheetModalItem";
 import { BiographyEntity } from "@/models/project/UserProfile";
-import Counter from "../../components/UserProfile/Counter";
-import MutualFriends from "@/components/UserProfile/MutualFriends";
+import Counter from "../../components/UserProfile/Counter/Counter";
+import MutualFriends from "@/components/UserProfile/MutualFriends/MutualFriends";
 import { AuthLogOut } from "@/api/routes/auth";
-import { removeAuthToken } from "@/business/secure-store/AuthToken";
+import {
+  getAuthToken,
+  removeAuthToken,
+} from "@/business/secure-store/AuthToken";
 import { resetWs } from "@/business/redux/features/socket/socketSlice";
 import { logout } from "@/business/redux/features/user/userSlice";
 import AntDesignButton from "@/components/AntDesignButton";
@@ -199,20 +202,14 @@ const UserProfileSceen = ({
     }
   );
 
-  const {
-    data: friendshipsStatus,
-    error: friendshipsStatusError,
-    isLoading: friendshipsStatusIsLoading,
-    isError: friendshipsStatusIsError,
-    refetch: friendshipsStatusRefetch,
-    isRefetching: friendshipsStatusIsRefetching,
-  } = useQuery(
-    ["user", userId, "friendships", tokenApi],
-    () => ShowFriendship(userId, tokenApi),
-    {
-      enabled: false,
-    }
-  );
+  const { data: friendshipsStatus, refetch: friendshipsStatusRefetch } =
+    useQuery(
+      ["user", userId, "friendships", tokenApi],
+      () => ShowFriendship(userId, tokenApi),
+      {
+        enabled: false,
+      }
+    );
 
   React.useEffect(() => {
     navigation.setOptions({
@@ -334,8 +331,13 @@ const UserProfileSceen = ({
   );
 
   const clearGlobalCache = async () => {
-    queryClient.clear();
+    const authTokenBefore = await getAuthToken();
+    console.log("clearing global cache b", authTokenBefore);
     await removeAuthToken();
+    const authTokenAfter = await getAuthToken();
+    console.log("clearing global cache a", authTokenAfter);
+
+    queryClient.clear();
 
     dispatch(resetWs());
     dispatch(logout());
@@ -503,27 +505,16 @@ const UserProfileSceen = ({
               <BottomSheetModalItem
                 label="Settings and privacy"
                 onPress={() => {}}
-                // icon={<Ionicons name="settings" size={16} color="black" />}
                 bottomDivider
               />
               <BottomSheetModalItem
                 label="Edit profile"
                 onPress={() => {}}
-                // icon={
-                //   <MaterialCommunityIcons
-                //     name="account-edit"
-                //     size={16}
-                //     color="black"
-                //   />
-                // }
                 bottomDivider
               />
               <BottomSheetModalItem
                 label="Log out"
                 onPress={() => logOutMutation.mutate()}
-                // icon={
-                //   <MaterialCommunityIcons name="logout" size={16} color="black" />
-                // }
               />
             </View>
           </BottomSheetModal>
@@ -539,28 +530,9 @@ const UserProfileSceen = ({
                 <BottomSheetModalItem
                   label="Report"
                   onPress={() => {}}
-                  // icon={<Ionicons name="settings" size={16} color="black" />}
                   bottomDivider
                 />
-                <BottomSheetModalItem
-                  label="Block"
-                  onPress={() => {}}
-                  // icon={
-                  //   <MaterialCommunityIcons
-                  //     name="account-edit"
-                  //     size={16}
-                  //     color="black"
-                  //   />
-                  // }
-                  bottomDivider
-                />
-                <BottomSheetModalItem
-                  label="Copy profile URL"
-                  onPress={() => {}}
-                  // icon={
-                  //   <MaterialCommunityIcons name="logout" size={16} color="black" />
-                  // }
-                />
+                <BottomSheetModalItem label="Block" onPress={() => {}} />
               </View>
             </BottomSheetModal>
           </>
@@ -618,6 +590,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 24,
     color: "#000",
+    letterSpacing: 1,
   },
   textSubtitle: {
     fontSize: 14,

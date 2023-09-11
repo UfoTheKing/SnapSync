@@ -1,4 +1,3 @@
-import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useTheme } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,5 +20,3 @@ const Verified = (props: Props) => {
 };
 
 export default Verified;
-
-const styles = StyleSheet.create({});

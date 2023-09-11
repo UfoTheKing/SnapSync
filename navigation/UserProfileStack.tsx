@@ -3,8 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { UserProfileStackParamList } from "@/types";
 import { useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import UserProfileSceen from "@/screens/UserProfile/UserProfileSceen";
 import FriendsListScreen from "@/screens/UserProfile/FriendsListScreen";
+import UserProfile from "@/screens/UserProfileStack/UserProfile/UserProfile";
 
 type Props = {};
 
@@ -23,7 +23,7 @@ const UserProfileStack = (props: Props) => {
     >
       <Stack.Screen
         name="UserProfile"
-        component={UserProfileSceen}
+        component={UserProfile}
         initialParams={{
           fromHome: true,
           userId: user!.id,

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { SnapSyncStackScreenProps } from "@/types";
 import { useSelector } from "react-redux";
@@ -9,11 +9,17 @@ import {
   CheckSnapInstance,
   FetchSnapSyncShapes,
 } from "@/api/routes/snaps_sync";
-import { Spinner } from "native-base";
+import { Spinner, useTheme } from "native-base";
 import { instanceOfErrorResponseType } from "@/api/client";
 import { Shape } from "@/models/project/Shape";
 import { createWssMessage } from "@/utils/utils";
 import { WssActions } from "@/utils/wss";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import TurnCameraButton from "@/components/Camera/TurnCameraButton";
+import { CameraType, FlashMode } from "expo-camera";
+import FlashButton from "@/components/Camera/FlashButton";
+import {} from "react-native-gesture-handler";
+import ShapeMenu from "@/components/SnapSync/ShapeMenu";
 
 type Props = {};
 
@@ -22,6 +28,10 @@ const SnapSyncScreen = ({
   route,
 }: SnapSyncStackScreenProps<"SnapSync">) => {
   const { mode, key } = route.params;
+
+  const insets = useSafeAreaInsets();
+
+  const colors = useTheme().colors;
 
   const ws = useSelector((state: RootState) => state.socket.ws);
   const isLogged = useSelector((state: RootState) => state.socket.isLogged);
@@ -32,8 +42,10 @@ const SnapSyncScreen = ({
   const snapSync = useSelector((state: RootState) => state.snapSync.snapSync);
 
   const [initialShape, setInitialShape] = React.useState<Shape | null>(null);
-  const [isLoadingCreateSnapInstance, setIsLoadingCreateSnapInstance] =
-    React.useState(false);
+  const [isShapeMenuOpen, setIsShapeMenuOpen] = React.useState<boolean>(false);
+
+  const [camMode, setCamMode] = React.useState<CameraType>(CameraType.front);
+  const [camFlahs, setCamFlash] = React.useState<FlashMode>(FlashMode.off);
 
   const {
     data: shapes,
@@ -195,9 +207,87 @@ const SnapSyncScreen = ({
     }
   }
 
-  return <Container></Container>;
+  return (
+    <Container safeAreaLeft={false} safeAreaRight={false} safeAreaTop={false}>
+      <View style={styles.shapeContainer}>
+        <Text>Shape</Text>
+      </View>
+      <View
+        style={[
+          styles.footerContainer,
+          {
+            paddingLeft: insets.left,
+            paddingRight: insets.right,
+          },
+        ]}
+      >
+        <View style={styles.options}>
+          <FlashButton
+            onPress={() => {
+              setCamFlash(
+                camFlahs === FlashMode.off ? FlashMode.on : FlashMode.off
+              );
+            }}
+            flashMode={camFlahs}
+          />
+
+          <ShapeMenu shape={initialShape} isOpen={isShapeMenuOpen} />
+
+          <TurnCameraButton
+            onPress={() => {
+              setCamMode(
+                camMode === CameraType.back ? CameraType.front : CameraType.back
+              );
+            }}
+            mode={camMode}
+          />
+        </View>
+        <View style={styles.leave}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
+            <Text
+              style={[
+                styles.leaveText,
+                {
+                  color: colors.red[500],
+                },
+              ]}
+            >
+              Leave SnapSync
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Container>
+  );
 };
 
 export default SnapSyncScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  shapeContainer: {
+    flex: 2,
+    backgroundColor: "red",
+  },
+  footerContainer: {
+    flex: 1,
+  },
+  options: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    flex: 1,
+    alignItems: "center",
+  },
+  leave: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  leaveText: {
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+});

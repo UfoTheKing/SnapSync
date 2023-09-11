@@ -2,6 +2,7 @@ import client, { API_URL, ErrorResponseType } from "../client";
 import { ILoginResponse } from "@/models/auth/Auth";
 import { getDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import * as FileSystem from "expo-file-system";
+import { Country } from "@/models/resources/Country";
 
 const API_PATH = "/auth";
 
@@ -11,6 +12,19 @@ export const AuthGetSessionId = async (): Promise<{
 }> => {
   try {
     const { data } = await client.get(`${API_PATH}/get_session_id`);
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const AuthGetCountryFromIp = async (): Promise<{
+  country: Country | null;
+  message: string;
+}> => {
+  try {
+    const { data } = await client.get(`${API_PATH}/get_country_from_ip`);
 
     return data;
   } catch (error) {

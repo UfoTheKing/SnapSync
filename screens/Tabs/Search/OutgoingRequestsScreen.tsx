@@ -115,11 +115,12 @@ const OutgoingRequestsScreen = ({
               fullName={item.user.fullName}
               profilePictureUrl={item.user.profilePictureUrl}
               isVerified={item.user.isVerified}
-              ph={15}
-              mt={index === 0 ? 15 : 0}
-              bgc={LightBackground}
               contact={item.user.isContact}
               showContact={true}
+              containerStyle={{
+                paddingHorizontal: 15,
+                marginTop: index === 0 ? 15 : 0,
+              }}
               rightComponent={
                 <View
                   style={{

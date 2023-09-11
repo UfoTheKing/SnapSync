@@ -1,4 +1,3 @@
-import { StyleSheet } from "react-native";
 import React from "react";
 import { ILoginResponse } from "@/models/auth/Auth";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -33,11 +32,18 @@ const RootNavigation = ({ data }: Props) => {
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = React.useState(true);
+  const [dataCopy, setDataCopy] = React.useState<ILoginResponse | undefined>(
+    data
+  );
 
   React.useEffect(() => {
     const loginAuthToken = async () => {
-      if (data && !isLoggedIn) {
-        dispatch(login(data));
+      if (dataCopy && !isLoggedIn) {
+        // Invalido la props data in modo da non ripetere il login, nel caso in cui l'utente faccia logout
+        // e poi ritorni alla schermata di login
+        setDataCopy(undefined);
+
+        dispatch(login(dataCopy));
 
         setIsLoading(false);
       } else {
@@ -46,7 +52,7 @@ const RootNavigation = ({ data }: Props) => {
     };
 
     loginAuthToken();
-  }, [data, isLoggedIn]);
+  }, [dataCopy, isLoggedIn]);
 
   React.useEffect(() => {
     const ws = new WebSocket(WSS_URL);
@@ -114,13 +120,6 @@ const RootNavigation = ({ data }: Props) => {
         </Stack.Group>
       ) : (
         <Stack.Group>
-          {/* <Stack.Screen
-            name="Onboarding"
-            component={OnboardingScreen}
-            options={{
-              headerShown: false,
-            }}
-          /> */}
           <Stack.Screen
             name="AuthStack"
             component={AuthStack}
@@ -135,5 +134,3 @@ const RootNavigation = ({ data }: Props) => {
 };
 
 export default RootNavigation;
-
-const styles = StyleSheet.create({});

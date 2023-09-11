@@ -4,28 +4,27 @@ import {
   TouchableOpacity,
   View,
   Image,
-  Button as RnButton,
+  Button,
 } from "react-native";
 import React, { useState } from "react";
 import { AuthStackScreenProps } from "@/types";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Camera, CameraType, FlashMode } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from "expo-image-picker";
-import { Camera, CameraType, FlashMode } from "expo-camera";
 import Container from "@/components/Container";
 import { ScreenWidth } from "@/constants/Layout";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import TurnCameraButton from "@/components/Camera/TurnCameraButton";
+import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
+import { useMutation } from "react-query";
 import { AuthSignUp } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
-import { useMutation } from "react-query";
-import { authStyles } from "./AuthInsertFullName";
-import { Button } from "native-base";
+import Toast from "react-native-toast-message";
 import { storeAuthToken } from "@/business/secure-store/AuthToken";
-import { useDispatch } from "react-redux";
 import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
+import { useDispatch } from "react-redux";
 import { login } from "@/business/redux/features/user/userSlice";
-
-type Props = {};
 
 const AuthChooseProfilePicture = ({
   navigation,
@@ -33,25 +32,15 @@ const AuthChooseProfilePicture = ({
 }: AuthStackScreenProps<"AuthChooseProfilePicture">) => {
   const { userData } = route.params;
 
-  const dispatch = useDispatch();
-
-  const cameraRef = React.useRef<Camera>(null);
-
   const insets = useSafeAreaInsets();
 
-  const [type, setType] = useState(CameraType.back);
-  const [flashMode, setFlashMode] = useState(FlashMode.off);
-  const [zoom, setZoom] = useState(0);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
-  const [isCameraReady, setIsCameraReady] = useState(false);
+  // REDUX
+  const dispatch = useDispatch();
 
-  const [firstImage, setFirstImage] = useState<string | null>(null);
+  // REFS
+  const cameraRef = React.useRef<Camera>(null);
 
-  const [mediaLibraryPermission, requestMediaLibraryPermission] =
-    MediaLibrary.usePermissions();
-
-  const [imageToUse, setImageToUse] = useState<string | null>(null);
-
+  // MUTATIONS
   const SignUpMutation = useMutation(
     (data: { uri: string; sessionId: string }) =>
       AuthSignUp(data.uri, data.sessionId),
@@ -63,13 +52,35 @@ const AuthChooseProfilePicture = ({
         dispatch(login(data));
       },
       onError: (error) => {
+        let message = "An error occurred";
         if (error && instanceOfErrorResponseType(error)) {
-          alert(error.message);
+          message = error.message;
         }
+
+        Toast.show({
+          type: "error",
+          text1: message,
+          position: "bottom",
+        });
       },
     }
   );
 
+  // QUERIES
+
+  // STATES
+  const [type, setType] = useState(CameraType.back);
+  const [flashMode, setFlashMode] = useState(FlashMode.off);
+  const [zoom, setZoom] = useState(0);
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  const [firstImage, setFirstImage] = useState<string | null>(null);
+  const [imageToUse, setImageToUse] = useState<string | null>(null);
+
+  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [mediaLibraryPermission, requestMediaLibraryPermission] =
+    MediaLibrary.usePermissions();
+
+  // EFFECTS
   React.useEffect(() => {
     requestPermission();
     requestMediaLibraryPermission();
@@ -93,38 +104,12 @@ const AuthChooseProfilePicture = ({
   }, [mediaLibraryPermission]);
 
   React.useEffect(() => {
-    if (imageToUse) {
-    }
-  }, [imageToUse]);
-
-  React.useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
       e.preventDefault(); // Non lo faccio uscire dalla pagina
     });
   }, [navigation]);
 
-  if (!permission) {
-    // Camera permissions are still loading
-    return null;
-  }
-
-  if (!permission.granted) {
-    // Camera permissions are not granted yet
-
-    return (
-      <Container textCenter>
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: "bold",
-          }}
-        >
-          We need your permission to show the camera
-        </Text>
-      </Container>
-    );
-  }
-
+  // FUNCTIONS
   const toggleCameraType = () => {
     setType(type === CameraType.back ? CameraType.front : CameraType.back);
   };
@@ -158,7 +143,6 @@ const AuthChooseProfilePicture = ({
     }
   };
 
-  // TODO: Capire perche il bottono non è centrato
   if (imageToUse) {
     return (
       <Container>
@@ -166,7 +150,6 @@ const AuthChooseProfilePicture = ({
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "center",
           }}
         >
           <Image
@@ -178,36 +161,23 @@ const AuthChooseProfilePicture = ({
             }}
           />
 
-          <RnButton
+          <Button
             title="Retry"
             onPress={() => setImageToUse(null)}
             disabled={SignUpMutation.isLoading}
           />
-        </View>
-        <View
-          style={{
-            ...authStyles.buttonContainer,
-            bottom: insets.bottom,
-          }}
-        >
-          <Button
-            style={authStyles.button}
+
+          <BottomButton
+            label="Get Started"
             isLoading={SignUpMutation.isLoading}
+            disabled={SignUpMutation.isLoading}
             onPress={() => {
               SignUpMutation.mutate({
                 uri: imageToUse,
                 sessionId: userData.sessionId,
               });
             }}
-          >
-            <Text
-              style={{
-                ...authStyles.buttonText,
-              }}
-            >
-              Get Started
-            </Text>
-          </Button>
+          />
         </View>
       </Container>
     );
@@ -221,47 +191,57 @@ const AuthChooseProfilePicture = ({
       safeAreaTop={false}
     >
       <View
-        style={{
-          height: insets.top,
-          width: ScreenWidth,
-          backgroundColor: "#f7f7f7",
-          // borderBottomLeftRadius: 10,
-          // borderBottomRightRadius: 10,
-          position: "relative",
-          zIndex: 1,
-          // top: 10,
-        }}
-      />
-      <View style={styles.container}>
-        <Camera
-          ref={cameraRef}
-          style={styles.camera}
-          type={type}
-          flashMode={flashMode}
-          zoom={zoom}
-          onCameraReady={() => setIsCameraReady(true)}
-        >
-          <View style={styles.cameraHeader}>
-            <TouchableOpacity onPress={toggleFlashMode}>
-              {flashMode === FlashMode.off ? (
-                <MaterialIcons name="flash-off" size={24} color="white" />
-              ) : (
-                <MaterialIcons name="flash-on" size={24} color="white" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </Camera>
+        style={[
+          styles.containerCamera,
+          {
+            alignItems:
+              !permission || !permission.granted ? "center" : "stretch",
+            justifyContent:
+              !permission || !permission.granted ? "center" : "flex-start",
+          },
+        ]}
+      >
+        {
+          // Camera permissions are not granted yet
+          !permission || !permission.granted ? (
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: "bold",
+              }}
+            >
+              We need your permission to show the camera
+            </Text>
+          ) : permission.granted ? (
+            <Camera
+              ref={cameraRef}
+              style={styles.containerCamera}
+              type={type}
+              flashMode={flashMode}
+              zoom={zoom}
+              onCameraReady={() => setIsCameraReady(true)}
+            >
+              <View style={styles.cameraHeader}>
+                <TouchableOpacity onPress={toggleFlashMode}>
+                  {flashMode === FlashMode.off ? (
+                    <Ionicons name="flash-off" size={24} color="white" />
+                  ) : (
+                    <Ionicons name="flash" size={24} color="white" />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </Camera>
+          ) : null
+        }
       </View>
       <View
         style={{
           height: 100,
           width: ScreenWidth,
-          backgroundColor: "#f7f7f7",
-          // borderTopLeftRadius: 10,
-          // borderTopRightRadius: 10,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
           position: "relative",
           zIndex: 1,
-          // bottom: 10,
           alignItems: "center",
           justifyContent: "space-around",
           flexDirection: "row",
@@ -302,24 +282,7 @@ const AuthChooseProfilePicture = ({
             }}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleCameraType}>
-          <View
-            style={{
-              width: 50,
-              height: 50,
-              backgroundColor: "gray",
-              borderRadius: 100,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {type === CameraType.back ? (
-              <MaterialIcons name="flip-to-front" size={24} color="white" />
-            ) : (
-              <MaterialIcons name="flip-to-back" size={24} color="white" />
-            )}
-          </View>
-        </TouchableOpacity>
+        <TurnCameraButton mode={type} onPress={toggleCameraType} />
       </View>
     </Container>
   );
@@ -328,13 +291,8 @@ const AuthChooseProfilePicture = ({
 export default AuthChooseProfilePicture;
 
 const styles = StyleSheet.create({
-  container: {
+  containerCamera: {
     flex: 1,
-    borderRadius: 10,
-  },
-  camera: {
-    flex: 1,
-    borderRadius: 10,
   },
   cameraHeader: {
     height: 75,

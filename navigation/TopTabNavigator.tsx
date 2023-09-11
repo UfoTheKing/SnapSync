@@ -12,8 +12,7 @@ import { CreateUserContacts } from "@/api/routes/user";
 import { getDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import { createWssMessage } from "@/utils/utils";
 import { WssActions } from "@/utils/wss";
-import { initWs, loginWs } from "@/business/redux/features/socket/socketSlice";
-import { WSS_URL } from "@/api/client";
+import { loginWs } from "@/business/redux/features/socket/socketSlice";
 
 const Tab = createMaterialTopTabNavigator<RootTabParamList>();
 
@@ -26,12 +25,8 @@ const TopTabNavigator = (props: Props) => {
 
   const dispatch = useDispatch();
 
-  const createUserContactsMutation = useMutation(
-    (phoneNumbers: string[]) => CreateUserContacts(phoneNumbers, tokenApi),
-    {
-      onSuccess: (data) => {},
-      onError: (error) => {},
-    }
+  const createUserContactsMutation = useMutation((phoneNumbers: string[]) =>
+    CreateUserContacts(phoneNumbers, tokenApi)
   );
 
   useEffect(() => {
@@ -89,39 +84,6 @@ const TopTabNavigator = (props: Props) => {
       };
     }
   }, [ws]);
-
-  // Mi collego al WebSocket
-  // useEffect(() => {
-  //   const ws = new WebSocket(WSS_URL);
-  //   ws.onopen = async () => {
-  //     const deviceUuid = await getDeviceUuid();
-  //     if (deviceUuid) {
-  //       let message = createWssMessage(
-  //         tokenApi,
-  //         deviceUuid,
-  //         WssActions.Login,
-  //         null
-  //       );
-  //       ws.send(message);
-  //     }
-  //   };
-  //   ws.onmessage = (e) => {
-  //     let data = JSON.parse(e.data);
-  //     if (data.action === WssActions.Login && data.success) {
-  //       dispatch(initWs(ws));
-  //     }
-  //     // Receive a message from the server
-  //     // console.log(e);
-  //   };
-  //   // ws.onerror = (e) => {
-  //   //   // An error occurred
-  //   //   console.log(e.message);
-  //   // };
-  //   ws.onclose = (e) => {
-  //     // Connection closed
-  //     // console.log(e.code, e.reason);
-  //   };
-  // }, []);
 
   return (
     <Tab.Navigator

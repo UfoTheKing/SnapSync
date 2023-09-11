@@ -184,9 +184,9 @@ const Search = (props: Props) => {
                       fullName={user.fullName}
                       profilePictureUrl={user.profilePictureUrl}
                       isVerified={user.isVerified}
-                      ph={0}
-                      mt={10}
-                      bgc={LightBackground}
+                      containerStyle={{
+                        marginTop: 10,
+                      }}
                       rightComponent={
                         <View
                           style={{

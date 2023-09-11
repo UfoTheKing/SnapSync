@@ -1,6 +1,11 @@
-import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import React from "react";
-import { ScreenWidth } from "@/constants/Layout";
 import Avatar from "./User/Avatar";
 import Info from "./User/Info";
 import { INLINE_USER_HEIGHT } from "./User/styles";
@@ -12,10 +17,9 @@ type Props = {
   profilePictureUrl: string;
   isVerified: boolean;
 
-  bgc?: string;
   rightComponent?: React.ReactNode;
-  ph?: number;
-  mt?: number;
+
+  containerStyle?: StyleProp<ViewStyle>;
 
   onPress?: () => void;
   disabled?: boolean;
@@ -30,9 +34,7 @@ const InlineUser = (props: Props) => {
     fullName,
     profilePictureUrl,
     isVerified,
-    bgc = "#fff",
-    ph = 0,
-    mt = 0,
+    containerStyle,
 
     onPress,
     disabled = false,
@@ -44,13 +46,14 @@ const InlineUser = (props: Props) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <TouchableOpacity onPress={onPress} disabled={disabled}>
-      <View
-        style={[
-          styles.container,
-          { paddingHorizontal: ph, backgroundColor: bgc, marginTop: mt },
-        ]}
-      >
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      onLongPress={() => {
+        console.log("long press");
+      }}
+    >
+      <View style={[styles.container, containerStyle]}>
         <View style={styles.boxUserInfos}>
           <Avatar profilePictureUrl={profilePictureUrl} />
           <Info
@@ -75,6 +78,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     height: INLINE_USER_HEIGHT,
+    backgroundColor: "white",
   },
   boxUserInfos: {
     flexDirection: "row",

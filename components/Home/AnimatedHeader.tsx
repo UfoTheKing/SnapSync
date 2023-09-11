@@ -102,6 +102,7 @@ const AnimatedHeader = (props: Props) => {
               justifyContent: "center",
             }}
           >
+            {/** TODO: Change ICON */}
             <FontAwesome5 name="user-friends" size={24} color="black" />
           </VStack>
         </TouchableOpacity>

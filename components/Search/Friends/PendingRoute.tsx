@@ -161,6 +161,7 @@ const PendingRoute = (props: Props) => {
                   People who have sent you a friend request
                 </Text>
               </View>
+              {/** TODO: Change ICON */}
               <Entypo name="chevron-right" size={24} color="black" />
             </View>
           </TouchableOpacity>
@@ -183,9 +184,11 @@ const PendingRoute = (props: Props) => {
               fullName={item.user.fullName}
               profilePictureUrl={item.user.profilePictureUrl}
               isVerified={item.user.isVerified}
-              ph={15}
               contact={item.user.isContact}
               showContact={true}
+              containerStyle={{
+                paddingHorizontal: 15,
+              }}
               rightComponent={
                 <View
                   style={{

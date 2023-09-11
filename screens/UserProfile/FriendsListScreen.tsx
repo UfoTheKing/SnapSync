@@ -148,8 +148,10 @@ const FriendsListScreen = ({
               fullName={item.user.fullName}
               profilePictureUrl={item.user.profilePictureUrl}
               isVerified={item.user.isVerified}
-              ph={15}
-              mt={index === 0 ? 15 : 0}
+              containerStyle={{
+                paddingHorizontal: 15,
+                marginTop: index === 0 ? 15 : 0,
+              }}
             />
           );
         }}
