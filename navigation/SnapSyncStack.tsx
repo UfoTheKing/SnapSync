@@ -1,8 +1,9 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SnapSyncStackParamList } from "@/types";
-import InviteScreen from "@/screens/SnapSync/InviteScreen";
-import SnapSyncScreen from "@/screens/SnapSync/SnapSyncScreen";
+import SnapSync from "@/screens/SnapSyncStack/SnapSync/SnapSync";
+import TakeSnap from "@/screens/SnapSyncStack/TakeSnap/TakeSnap";
+import PublishSnap from "@/screens/SnapSyncStack/PublishSnap/PublishSnap";
 
 type Props = {};
 
@@ -19,15 +20,27 @@ const SnapSyncStack = (props: Props) => {
     >
       <Stack.Screen
         name="SnapSync"
-        component={SnapSyncScreen}
+        component={SnapSync}
         options={{
           gestureEnabled: false,
         }}
       />
 
-      <Stack.Group screenOptions={{ presentation: "modal" }}>
-        <Stack.Screen name="Invite" component={InviteScreen} />
-      </Stack.Group>
+      <Stack.Screen
+        name="TakeSnap"
+        component={TakeSnap}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="PublishSnap"
+        component={PublishSnap}
+        options={{
+          gestureEnabled: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };

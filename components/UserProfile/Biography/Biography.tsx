@@ -35,7 +35,7 @@ const Biography = (props: Props) => {
               <Text
                 key={i}
                 style={{
-                  color: "#0000EE",
+                  color: colors.primary[900],
                 }}
                 onPress={() => {
                   if (entity) props.onPressEntity?.(entity);

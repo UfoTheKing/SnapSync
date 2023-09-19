@@ -13,12 +13,12 @@ import { instanceOfErrorResponseType } from "@/api/client";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
 import Container from "@/components/Container";
-import Logo from "@/components/AuthStack/Logo/Logo";
-import Form from "@/components/AuthStack/Form/Form";
+import Logo from "@/components/Auth/Logo/Logo";
 import { Input } from "native-base";
 import { AuthStyles } from "../styles";
 import { PlaceholderColor } from "@/constants/Layout";
-import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
+import BottomButton from "@/components/Auth/BottomButton/BottomButton";
+import FormContainer from "@/components/Forms/FormContainer/FormContainer";
 
 const AuthInsertDateOfBirth = ({
   navigation,
@@ -186,7 +186,7 @@ const AuthInsertDateOfBirth = ({
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
-        behavior={"height"}
+        behavior={"padding"}
         style={{
           flex: 1,
           alignItems: "center",
@@ -194,7 +194,7 @@ const AuthInsertDateOfBirth = ({
       >
         <Logo title={`Hi ${userData.fullName}, when is your birthday?`} />
 
-        <Form style={styles.form}>
+        <FormContainer style={styles.form}>
           <View style={styles.container}>
             <Input
               ref={textInputMonth}
@@ -262,7 +262,7 @@ const AuthInsertDateOfBirth = ({
               isDisabled={mutation.isLoading}
             />
           </View>
-        </Form>
+        </FormContainer>
 
         <BottomButton
           label="Continue"

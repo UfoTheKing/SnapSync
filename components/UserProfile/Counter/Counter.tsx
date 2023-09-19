@@ -1,18 +1,28 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import {} from "react-native-gesture-handler";
 
 type Props = {
-  friends: number;
-  snaps: number;
+  isMyProfile?: boolean;
 
-  onPressFriends: () => void;
-  disabledFriends: boolean;
+  friendsCount?: number;
+  mutualFriendsCount?: number;
+
+  snapsCount?: number;
+
+  onPressFriends?: () => void;
+  disabledFriends?: boolean;
 };
 
 const Counter = (props: Props) => {
-  const { friends, snaps } = props;
+  const {
+    isMyProfile,
+    friendsCount,
+    mutualFriendsCount,
+    snapsCount,
+    onPressFriends,
+    disabledFriends,
+  } = props;
 
   return (
     <View style={styles.container}>
@@ -30,18 +40,31 @@ const Counter = (props: Props) => {
       >
         <TouchableOpacity disabled={true}>
           <View style={styles.cell}>
-            <Text style={styles.number}>{snaps}</Text>
-            <Text style={styles.text}>Snaps</Text>
+            <Text style={styles.number}>
+              {snapsCount !== undefined ? snapsCount : null}
+            </Text>
+            <Text style={styles.text}>
+              {isMyProfile !== undefined ? "Snaps" : null}
+            </Text>
           </View>
         </TouchableOpacity>
         <View style={[styles.cell, styles.border]}></View>
-        <TouchableOpacity
-          onPress={props.onPressFriends}
-          disabled={props.disabledFriends}
-        >
+        <TouchableOpacity onPress={onPressFriends} disabled={disabledFriends}>
           <View style={styles.cell}>
-            <Text style={styles.number}>{friends}</Text>
-            <Text style={styles.text}>Friends</Text>
+            <Text style={styles.number}>
+              {isMyProfile !== undefined
+                ? isMyProfile
+                  ? friendsCount
+                  : mutualFriendsCount
+                : null}
+            </Text>
+            <Text style={styles.text}>
+              {isMyProfile !== undefined
+                ? isMyProfile
+                  ? "Friends"
+                  : "Mutual Friends"
+                : null}
+            </Text>
           </View>
         </TouchableOpacity>
       </LinearGradient>

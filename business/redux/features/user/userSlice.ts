@@ -37,9 +37,26 @@ export const userSlice = createSlice({
       state.tokenApi = "";
       state.user = null;
     },
+
+    changeUsername: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        state.user.username = action.payload;
+      }
+    },
+    changeFullName: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        state.user.username = action.payload;
+      }
+    },
+    changeBio: (state, action: PayloadAction<string | null>) => {
+      if (state.user) {
+        state.user.biography = action.payload;
+      }
+    },
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, changeUsername, changeFullName, changeBio } =
+  userSlice.actions;
 
 export default userSlice.reducer;

@@ -3,14 +3,12 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { UserProfileStackParamList } from "@/types";
 import { useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import FriendsListScreen from "@/screens/UserProfile/FriendsListScreen";
 import UserProfile from "@/screens/UserProfileStack/UserProfile/UserProfile";
-
-type Props = {};
+import MutualFriends from "@/screens/UserProfileStack/MutualFriends/MutualFriends";
 
 const Stack = createNativeStackNavigator<UserProfileStackParamList>();
 
-const UserProfileStack = (props: Props) => {
+const UserProfileStack = () => {
   const user = useSelector((state: RootState) => state.user.user);
 
   return (
@@ -30,7 +28,9 @@ const UserProfileStack = (props: Props) => {
         }}
       />
 
-      <Stack.Screen name="FriendsList" component={FriendsListScreen} />
+      <Stack.Group screenOptions={{ presentation: "modal" }}>
+        <Stack.Screen name="MutualFriends" component={MutualFriends} />
+      </Stack.Group>
     </Stack.Navigator>
   );
 };

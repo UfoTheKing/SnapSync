@@ -21,14 +21,16 @@ export const socketSlice = createSlice({
     loginWs: (state) => {
       state.isLogged = true;
     },
+    logoutWs: (state) => {
+      state.isLogged = false;
+    },
 
     resetWs: (state) => {
       state.ws = null;
-      state.isLogged = false;
     },
   },
 });
 
-export const { initWs, loginWs, resetWs } = socketSlice.actions;
+export const { initWs, loginWs, logoutWs, resetWs } = socketSlice.actions;
 
 export default socketSlice.reducer;

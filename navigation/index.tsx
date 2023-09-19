@@ -13,6 +13,8 @@ import SnapSyncStack from "./SnapSyncStack";
 import { WSS_URL } from "@/api/client";
 import { WssActions } from "@/utils/wss";
 import { initWs, resetWs } from "@/business/redux/features/socket/socketSlice";
+import { createWssMessage } from "@/utils/utils";
+import EditProfileStack from "./EditProfileStack";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -28,12 +30,16 @@ const RootNavigation = ({ data }: Props) => {
   const colors = useTheme().colors;
 
   const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
+  const isLogged = useSelector((state: RootState) => state.socket.isLogged);
 
   const dispatch = useDispatch();
 
   const [isLoading, setIsLoading] = React.useState(true);
   const [dataCopy, setDataCopy] = React.useState<ILoginResponse | undefined>(
     data
+  );
+  const [stateWs, setStateWs] = React.useState<WebSocket | undefined>(
+    undefined
   );
 
   React.useEffect(() => {
@@ -56,6 +62,7 @@ const RootNavigation = ({ data }: Props) => {
 
   React.useEffect(() => {
     const ws = new WebSocket(WSS_URL);
+    setStateWs(ws);
     ws.onopen = async () => {
       console.log("connected to ws");
     };
@@ -77,6 +84,13 @@ const RootNavigation = ({ data }: Props) => {
       dispatch(resetWs());
     };
   }, []);
+
+  React.useEffect(() => {
+    if (stateWs && stateWs.readyState === 1 && !isLogged) {
+      let message = createWssMessage(WssActions.Logout);
+      console.log(message);
+    }
+  }, [stateWs, isLogged]);
 
   if (isLoading) return null;
 
@@ -104,6 +118,14 @@ const RootNavigation = ({ data }: Props) => {
           <Stack.Screen
             name="UserProfileStack"
             component={UserProfileStack}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="EditProfileStack"
+            component={EditProfileStack}
             options={{
               headerShown: false,
             }}

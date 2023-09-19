@@ -13,9 +13,6 @@ const SIZE = 20;
 const MutualFriends = (props: Props) => {
   const insets = useSafeAreaInsets();
 
-  if (!props.mutualFriends) return null;
-  if (props.mutualFriends.count === 0) return null;
-
   const text = React.useMemo(() => {
     let nCount = props.mutualFriends ? props.mutualFriends.nodes.length : 0;
     let more = props.mutualFriends ? props.mutualFriends.count - nCount : 0;
@@ -30,6 +27,9 @@ const MutualFriends = (props: Props) => {
 
     return r;
   }, []);
+
+  if (!props.mutualFriends) return null;
+  if (props.mutualFriends.count === 0) return null;
 
   return (
     <View style={styles.container}>
@@ -77,11 +77,11 @@ export default MutualFriends;
 const styles = StyleSheet.create({
   container: {
     marginTop: 2,
-    width: "100%",
     height: 50,
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "flex-start",
+    width: "100%",
+    maxWidth: 327,
   },
   text: {
     // marginLeft: 20,

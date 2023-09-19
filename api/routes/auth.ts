@@ -192,6 +192,7 @@ export const AuthLogInAuthToken = async (
 ): Promise<ILoginResponse> => {
   try {
     const deviceUuid = await getDeviceUuid();
+    console.log("deviceUuid", deviceUuid);
 
     const { data: response } = await client.post(
       `${API_PATH}/login_auth_token`,

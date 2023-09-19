@@ -9,16 +9,16 @@ import {
 import { useMutation, useQuery } from "react-query";
 import Container from "@/components/Container";
 import { Input, Spinner } from "native-base";
-import ErrorText from "@/components/ErrorText";
 import { useFocusEffect } from "@react-navigation/native";
 import { instanceOfErrorResponseType } from "@/api/client";
 import Toast from "react-native-toast-message";
-import Logo from "@/components/AuthStack/Logo/Logo";
-import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
-import Form from "@/components/AuthStack/Form/Form";
+import Logo from "@/components/Auth/Logo/Logo";
+import BottomButton from "@/components/Auth/BottomButton/BottomButton";
 import { PlaceholderColor } from "@/constants/Layout";
 import { AuthStyles } from "../styles";
-import { MAX_FULLNAME_LENGTH, MIN_FULLNAME_LENGTH } from "./costants";
+import ErrorHandler from "@/components/Error/ErrorHandler/ErrorHandler";
+import FormContainer from "@/components/Forms/FormContainer/FormContainer";
+import { FetchFullNameRules } from "@/api/routes/accounts";
 
 const AuthInsertFullName = ({
   navigation,
@@ -70,6 +70,20 @@ const AuthInsertFullName = ({
     }
   );
 
+  const {
+    data: rules,
+    isLoading: isLoadingRules,
+    isError: isErrorRules,
+    error: errorRules,
+  } = useQuery(["fullName", "rules"], () => FetchFullNameRules(), {
+    retry: 3,
+    refetchOnWindowFocus: false,
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+  });
+
   const { data: countryFromIp } = useQuery("CountryFromIp", () =>
     AuthGetCountryFromIp()
   );
@@ -119,7 +133,7 @@ const AuthInsertFullName = ({
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingRules) {
     return (
       <Container textCenter>
         <Spinner size="sm" />
@@ -127,10 +141,18 @@ const AuthInsertFullName = ({
     );
   }
 
-  if (isError || !data) {
+  if (isError || isErrorRules) {
     return (
       <Container textCenter>
-        <ErrorText error={error} />
+        <ErrorHandler error={isError ? error : errorRules} />
+      </Container>
+    );
+  }
+
+  if (!data || !rules) {
+    return (
+      <Container textCenter>
+        <ErrorHandler error={isError ? error : errorRules} />
       </Container>
     );
   }
@@ -138,7 +160,7 @@ const AuthInsertFullName = ({
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
-        behavior={"height"}
+        behavior={"padding"}
         style={{
           flex: 1,
           alignItems: "center",
@@ -146,7 +168,7 @@ const AuthInsertFullName = ({
       >
         <Logo title="Get Started, what is your name?" />
 
-        <Form>
+        <FormContainer>
           <Input
             ref={inputRef}
             style={AuthStyles.input}
@@ -156,14 +178,20 @@ const AuthInsertFullName = ({
             value={userData.fullName}
             onChangeText={handleChangedText}
             isDisabled={mutation.isLoading}
-            maxLength={MAX_FULLNAME_LENGTH}
+            maxLength={rules.rules.maxLength}
           />
-        </Form>
+        </FormContainer>
 
         <BottomButton
           label="Continue"
           isLoading={mutation.isLoading}
-          disabled={userData.fullName.trim().length < MIN_FULLNAME_LENGTH}
+          disabled={
+            rules.rules.minLength
+              ? userData.fullName.length < rules.rules.minLength
+              : rules.rules.maxLength
+              ? userData.fullName.length > rules.rules.maxLength
+              : false
+          }
           onPress={handlePress}
         />
       </KeyboardAvoidingView>

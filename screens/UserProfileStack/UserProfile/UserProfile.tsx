@@ -5,12 +5,13 @@ import {
   Text,
   View,
   Image,
+  Button,
 } from "react-native";
-import React, { useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { UserProfileStackScreenProps } from "@/types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import { useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import { Skeleton, useTheme } from "native-base";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import { ShowFriendship } from "@/api/routes/friendship";
@@ -18,15 +19,22 @@ import { useFocusEffect } from "@react-navigation/native";
 import { FetchUserProfileById } from "@/api/routes/user";
 import { LightBackground } from "@/utils/theme";
 import GoBackButton from "@/components/GoBackButton";
-import Verified from "@/components/User/Verified";
 import AntDesignButton from "@/components/AntDesignButton";
 import Container from "@/components/Container";
 import Biography from "@/components/UserProfile/Biography/Biography";
 import { BiographyEntity } from "@/models/project/UserProfile";
 import Counter from "@/components/UserProfile/Counter/Counter";
 import MutualFriends from "@/components/UserProfile/MutualFriends/MutualFriends";
-import ErrorText from "@/components/ErrorText";
 import { AntDesign } from "@expo/vector-icons";
+import { AuthLogOut } from "@/api/routes/auth";
+import { removeAuthToken } from "@/business/secure-store/AuthToken";
+import { logoutWs } from "@/business/redux/features/socket/socketSlice";
+import { logout } from "@/business/redux/features/user/userSlice";
+import BottomSheetModalItem from "@/components/BottomSheetModal/BottomSheetModalItem/BottomSheetModalItem";
+import BottomSheetModalCustomBackdrop from "@/components/BottomSheetModal/BottomSheetModalCustomBackdrop/BottomSheetModalCustomBackdrop";
+import { Ionicons } from "@expo/vector-icons";
+import HeaderUsername from "@/components/UserProfile/HeaderUsername/HeaderUsername";
+import ErrorHandler from "@/components/Error/ErrorHandler/ErrorHandler";
 
 const UserProfile = ({
   navigation,
@@ -53,8 +61,49 @@ const UserProfile = ({
   const snapPoints = useMemo(() => ["50%", "80%"], []);
 
   // CALLBACKS
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+  const handleDismissModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.dismiss();
+  }, []);
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetModalCustomBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        onPress={handleDismissModalPress}
+      />
+    ),
+    []
+  );
+
+  const handlePresentModalPressOtherUser = useCallback(() => {
+    bottomSheetModalOtherUserRef.current?.present();
+  }, []);
+  const handleDismissModalPressOtherUser = useCallback(() => {
+    bottomSheetModalOtherUserRef.current?.dismiss();
+  }, []);
+  const renderBackdropOtherUser = useCallback(
+    (props: any) => (
+      <BottomSheetModalCustomBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        onPress={handleDismissModalPressOtherUser}
+      />
+    ),
+    []
+  );
 
   // MUTATIONS
+  const logOutMutation = useMutation(() => AuthLogOut(tokenApi), {
+    onSuccess: (data) => {
+      clearGlobalCache();
+    },
+    onError: (error) => {},
+  });
 
   // QUERIES
   const {
@@ -96,24 +145,23 @@ const UserProfile = ({
       headerStyle: {
         backgroundColor: LightBackground,
       },
-      headerLeft: () => (
-        <GoBackButton
-          onPress={() => {
-            if (fromHome) {
-              navigation.navigate("Root", {
-                screen: "TabHomeStack",
-              });
-            } else navigation.goBack();
-          }}
-        />
-      ),
+      headerLeft: () => {
+        if (fromHome) return null;
+
+        return (
+          <GoBackButton
+            onPress={() => {
+              if (fromHome) {
+                navigation.navigate("Root", {
+                  screen: "TabHomeStack",
+                });
+              } else navigation.goBack();
+            }}
+          />
+        );
+      },
       headerTitle: () => (
-        <View style={styles.header}>
-          <Text style={styles.headerUsername}>
-            {renderHeaderUsernameText()}
-          </Text>
-          {userProfile && userProfile.isVerified && <Verified />}
-        </View>
+        <HeaderUsername userProfile={userProfile} username={username} />
       ),
       headerTitleAlign: "center",
       headerRight: () => {
@@ -160,9 +208,9 @@ const UserProfile = ({
               onPress={() => {
                 dismissAll();
                 if (userProfile.isMyProfile) {
-                  // handlePresentModalPress();
+                  handlePresentModalPress();
                 } else {
-                  // handlePresentModalPressOtherUser();
+                  handlePresentModalPressOtherUser();
                 }
               }}
               name="ellipsis1"
@@ -182,24 +230,6 @@ const UserProfile = ({
   );
 
   // FUNCTIONS
-  const renderHeaderUsernameText = () => {
-    if (userProfile) {
-      if (userProfile.username.length > 25) {
-        return userProfile.username.slice(0, 25) + "...";
-      } else {
-        return userProfile.username;
-      }
-    } else if (username) {
-      if (username.length > 25) {
-        return username.slice(0, 25) + "...";
-      } else {
-        return username;
-      }
-    }
-
-    return "";
-  };
-
   const handlePressEntity = (entity: BiographyEntity) => {
     if (entity.type === "user") {
       navigation.push("UserProfile", {
@@ -212,12 +242,21 @@ const UserProfile = ({
 
   const handlePressFriends = () => {
     if (userProfile) {
-      navigation.push("FriendsList", {
+      navigation.push("MutualFriends", {
         userId: userProfile.id,
         username: userProfile.username,
         isVerified: userProfile.isVerified,
       });
     }
+  };
+
+  const clearGlobalCache = async () => {
+    await removeAuthToken();
+
+    queryClient.clear();
+
+    dispatch(logoutWs());
+    dispatch(logout());
   };
 
   return (
@@ -254,14 +293,17 @@ const UserProfile = ({
           </View>
 
           <Counter
-            friends={userProfile?.friendsCount || 0}
-            snaps={userProfile?.snapsCount || 0}
+            isMyProfile={userProfile?.isMyProfile}
+            friendsCount={userProfile?.friendsCount}
+            mutualFriendsCount={userProfile?.mutualFriends?.count}
+            snapsCount={userProfile?.snapsCount}
             onPressFriends={handlePressFriends}
             disabledFriends={
               userProfile && friendshipsStatus
-                ? userProfile.isMyProfile ||
-                  friendshipsStatus.isBlocking ||
-                  (userProfile.isPrivate && !friendshipsStatus.isFriend)
+                ? userProfile.isMyProfile
+                  ? true
+                  : (userProfile.isPrivate && !friendshipsStatus.isFriend) ||
+                    friendshipsStatus.isBlocking
                   ? true
                   : false
                 : true
@@ -283,7 +325,7 @@ const UserProfile = ({
               alignItems: "center",
             }}
           >
-            <ErrorText error={userProfileError} />
+            <ErrorHandler error={userProfileError} />
           </View>
         ) : friendshipsStatus &&
           userProfile &&
@@ -321,6 +363,67 @@ const UserProfile = ({
           </View>
         ) : null}
       </ScrollView>
+
+      {userProfile ? (
+        userProfile.isMyProfile ? (
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            backdropComponent={renderBackdrop}
+          >
+            <View style={{ flex: 1, backgroundColor: "#fff" }}>
+              <BottomSheetModalItem
+                label="Settings and privacy"
+                onPress={() => {}}
+                bottomDivider
+                icon={<Ionicons name="settings" size={16} color="black" />}
+              />
+              <BottomSheetModalItem
+                label="Edit profile"
+                onPress={() => {
+                  dismissAll();
+                  navigation.navigate("EditProfileStack", {
+                    screen: "EditProfile",
+                  });
+                }}
+                bottomDivider
+                icon={<Ionicons name="pencil" size={16} color="black" />}
+              />
+              <BottomSheetModalItem
+                label="Log out"
+                onPress={() => logOutMutation.mutate()}
+                icon={<Ionicons name="log-out" size={16} color="black" />}
+              />
+            </View>
+          </BottomSheetModal>
+        ) : (
+          <>
+            <BottomSheetModal
+              ref={bottomSheetModalOtherUserRef}
+              index={0}
+              snapPoints={snapPoints}
+              backdropComponent={renderBackdropOtherUser}
+            >
+              <View style={{ flex: 1, backgroundColor: "#fff" }}>
+                <BottomSheetModalItem
+                  label="Report"
+                  onPress={() => {}}
+                  bottomDivider
+                  icon={
+                    <Ionicons name="alert-circle" size={16} color="black" />
+                  }
+                />
+                <BottomSheetModalItem
+                  label="Block"
+                  onPress={() => {}}
+                  icon={<Ionicons name="lock-closed" size={16} color="black" />}
+                />
+              </View>
+            </BottomSheetModal>
+          </>
+        )
+      ) : null}
     </Container>
   );
 };

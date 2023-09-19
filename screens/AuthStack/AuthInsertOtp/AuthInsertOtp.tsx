@@ -12,15 +12,15 @@ import { ILoginResponse } from "@/models/auth/Auth";
 import { storeAuthToken } from "@/business/secure-store/AuthToken";
 import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import { login } from "@/business/redux/features/user/userSlice";
-import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
+import BottomButton from "@/components/Auth/BottomButton/BottomButton";
 import Container from "@/components/Container";
 import { OTP_LENGTH } from "./costants";
-import Logo from "@/components/AuthStack/Logo/Logo";
+import Logo from "@/components/Auth/Logo/Logo";
 import { Input } from "native-base";
-import Form from "@/components/AuthStack/Form/Form";
 import { AuthStyles } from "../styles";
 import { PlaceholderColor } from "@/constants/Layout";
 import { useFocusEffect } from "@react-navigation/native";
+import FormContainer from "@/components/Forms/FormContainer/FormContainer";
 
 const AuthInsertOtp = ({
   navigation,
@@ -90,6 +90,8 @@ const AuthInsertOtp = ({
 
   // STATE
   const [timerEnd, setTimerEnd] = React.useState(false);
+  const [forceChangePhoneNumber, setForceChangePhoneNumber] =
+    React.useState(false);
 
   // EFFECTS
   React.useEffect(() => {
@@ -102,10 +104,21 @@ const AuthInsertOtp = ({
 
   React.useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
-      e.preventDefault(); // Non lo faccio uscire dalla pagina
-      return;
+      if (!forceChangePhoneNumber) {
+        // Prevent default behavior of leaving the screen
+        e.preventDefault();
+        return;
+      } else {
+        navigation.dispatch(e.data.action);
+      }
     });
-  }, [navigation]);
+  }, [navigation, forceChangePhoneNumber]);
+
+  React.useEffect(() => {
+    if (forceChangePhoneNumber) {
+      navigation.goBack();
+    }
+  }, [forceChangePhoneNumber, navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -164,7 +177,7 @@ const AuthInsertOtp = ({
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
-        behavior={"height"}
+        behavior={"padding"}
         style={{
           flex: 1,
           alignItems: "center",
@@ -172,7 +185,7 @@ const AuthInsertOtp = ({
       >
         <Logo title={`Insert the code sent to ${userData.phoneNumber}`} />
 
-        <Form>
+        <FormContainer>
           <Input
             ref={inputRef}
             style={{
@@ -188,7 +201,7 @@ const AuthInsertOtp = ({
             onChangeText={handleChange}
             isDisabled={validateOtpMutation.isLoading}
           />
-        </Form>
+        </FormContainer>
 
         <BottomButton
           label={
@@ -206,6 +219,15 @@ const AuthInsertOtp = ({
             resendOtpMutation.isLoading
           }
           onPress={handlePressResend}
+          onPressHelpText={() => {
+            if (validateOtpMutation.isLoading) return;
+            if (resendOtpMutation.isLoading) return;
+
+            setForceChangePhoneNumber(true);
+          }}
+          disabledHelpText={
+            validateOtpMutation.isLoading || resendOtpMutation.isLoading
+          }
         />
       </KeyboardAvoidingView>
     </Container>

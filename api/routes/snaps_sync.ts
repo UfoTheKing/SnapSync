@@ -1,5 +1,6 @@
 import { Shape } from "@/models/project/Shape";
-import client from "../client";
+import client, { API_URL, ErrorResponseType } from "../client";
+import * as FileSystem from "expo-file-system";
 
 const API_PATH = "/snaps_sync";
 
@@ -21,15 +22,12 @@ export const FetchSnapSyncShapes = async (
   }
 };
 
-export const CheckSnapInstance = async (
-  tokenApi: string,
-  key: string
-): Promise<{
-  message: string;
-  isJoinable: boolean;
-}> => {
+export const FetchSnapSyncComments = async (
+  id: number,
+  tokenApi: string
+): Promise<any> => {
   try {
-    const response = await client.get(`${API_PATH}/${key}/check/`, {
+    const response = await client.get(`${API_PATH}/${id}/comments`, {
       headers: {
         Authorization: `Bearer ${tokenApi}`,
       },
@@ -41,12 +39,47 @@ export const CheckSnapInstance = async (
   }
 };
 
-export const FetchSnapSyncComments = async (
-  id: number,
+export const SendSnap = async (
+  uri: string,
+  key: string,
   tokenApi: string
-): Promise<any> => {
+): Promise<{
+  message: string;
+}> => {
   try {
-    const response = await client.get(`${API_PATH}/${id}/comments`, {
+    const response = await FileSystem.uploadAsync(
+      `${API_URL}${API_PATH}/${key}/take_snap`,
+      uri,
+      {
+        fieldName: "snap",
+        httpMethod: "POST",
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        headers: {
+          Authorization: `Bearer ${tokenApi}`,
+        },
+      }
+    );
+    if (response.status > 299) {
+      let error: ErrorResponseType = JSON.parse(response.body);
+      throw error;
+    }
+
+    return JSON.parse(response.body);
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const CheckSnapInstance = async (
+  key: string,
+  tokenApi: string
+): Promise<{
+  message: string;
+  isJoinable: boolean;
+  shape: Shape;
+}> => {
+  try {
+    const response = await client.get(`${API_PATH}/${key}/check`, {
       headers: {
         Authorization: `Bearer ${tokenApi}`,
       },

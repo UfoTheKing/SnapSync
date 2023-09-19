@@ -29,9 +29,9 @@ export interface UserProfile {
 
   biography: Biography | null;
 
-  mutualFriends?: MutualFriends;
+  mutualFriends?: MutualFriends; // Nel caso non sia il mio profilo
+  friendsCount?: number; // Nel caso sia il mio profilo
 
-  friendsCount: number;
   snapsCount: number;
 
   isMyProfile: boolean;

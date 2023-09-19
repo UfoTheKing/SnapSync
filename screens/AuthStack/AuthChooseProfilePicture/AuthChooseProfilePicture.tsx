@@ -12,11 +12,10 @@ import { Camera, CameraType, FlashMode } from "expo-camera";
 import * as MediaLibrary from "expo-media-library";
 import * as ImagePicker from "expo-image-picker";
 import Container from "@/components/Container";
-import { ScreenWidth } from "@/constants/Layout";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import TurnCameraButton from "@/components/Camera/TurnCameraButton";
-import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
+import TurnCameraButton from "@/components/Camera/TurnCameraButton/TurnCameraButton";
+import BottomButton from "@/components/Auth/BottomButton/BottomButton";
 import { useMutation } from "react-query";
 import { AuthSignUp } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
@@ -25,6 +24,9 @@ import { storeAuthToken } from "@/business/secure-store/AuthToken";
 import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
 import { useDispatch } from "react-redux";
 import { login } from "@/business/redux/features/user/userSlice";
+import TakePhotoButton from "@/components/Camera/TakePhotoButton/TakePhotoButton";
+import { SCREEN_WIDTH } from "@gorhom/bottom-sheet";
+import ErrorText from "@/components/Error/ErrorText/ErrorText";
 
 const AuthChooseProfilePicture = ({
   navigation,
@@ -32,10 +34,11 @@ const AuthChooseProfilePicture = ({
 }: AuthStackScreenProps<"AuthChooseProfilePicture">) => {
   const { userData } = route.params;
 
-  const insets = useSafeAreaInsets();
-
   // REDUX
   const dispatch = useDispatch();
+
+  // HOOKS
+  const insets = useSafeAreaInsets();
 
   // REFS
   const cameraRef = React.useRef<Camera>(null);
@@ -133,7 +136,8 @@ const AuthChooseProfilePicture = ({
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
+      allowsEditing: true,
+      aspect: [1, 1],
       // aspect: [4, 3],
       quality: 1,
     });
@@ -155,9 +159,11 @@ const AuthChooseProfilePicture = ({
           <Image
             source={{ uri: imageToUse }}
             style={{
-              width: ScreenWidth / 2,
-              height: ScreenWidth / 2,
-              borderRadius: 180,
+              width: SCREEN_WIDTH / 2,
+              height: SCREEN_WIDTH / 2,
+              borderRadius: 150,
+              maxWidth: 300,
+              maxHeight: 300,
             }}
           />
 
@@ -188,34 +194,23 @@ const AuthChooseProfilePicture = ({
       safeAreaBottom={true}
       safeAreaLeft={false}
       safeAreaRight={false}
-      safeAreaTop={false}
+      safeAreaTop={true}
     >
       <View
-        style={[
-          styles.containerCamera,
-          {
-            alignItems:
-              !permission || !permission.granted ? "center" : "stretch",
-            justifyContent:
-              !permission || !permission.granted ? "center" : "flex-start",
-          },
-        ]}
+        style={{
+          alignItems: "center",
+          flex: 1,
+          width: SCREEN_WIDTH,
+          maxHeight: SCREEN_WIDTH,
+        }}
       >
-        {
-          // Camera permissions are not granted yet
-          !permission || !permission.granted ? (
-            <Text
-              style={{
-                fontSize: 12,
-                fontWeight: "bold",
-              }}
-            >
-              We need your permission to show the camera
-            </Text>
+        <View style={styles.preview}>
+          {!permission || !permission.granted ? (
+            <ErrorText message="We need your permission to show the camera" />
           ) : permission.granted ? (
             <Camera
               ref={cameraRef}
-              style={styles.containerCamera}
+              style={styles.camera}
               type={type}
               flashMode={flashMode}
               zoom={zoom}
@@ -231,21 +226,17 @@ const AuthChooseProfilePicture = ({
                 </TouchableOpacity>
               </View>
             </Camera>
-          ) : null
-        }
+          ) : null}
+        </View>
       </View>
       <View
-        style={{
-          height: 100,
-          width: ScreenWidth,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-          position: "relative",
-          zIndex: 1,
-          alignItems: "center",
-          justifyContent: "space-around",
-          flexDirection: "row",
-        }}
+        style={[
+          styles.footer,
+          {
+            paddingLeft: insets.left,
+            paddingRight: insets.right,
+          },
+        ]}
       >
         <TouchableOpacity onPress={pickImage}>
           <View
@@ -270,18 +261,7 @@ const AuthChooseProfilePicture = ({
             ) : null}
           </View>
         </TouchableOpacity>
-        <TouchableOpacity disabled={!isCameraReady} onPress={takePictureAsync}>
-          <View
-            style={{
-              width: 75,
-              height: 75,
-              backgroundColor: "white",
-              borderRadius: 100,
-              borderWidth: 5,
-              borderColor: "#d2d2d2",
-            }}
-          />
-        </TouchableOpacity>
+        <TakePhotoButton disabled={!isCameraReady} onPress={takePictureAsync} />
         <TurnCameraButton mode={type} onPress={toggleCameraType} />
       </View>
     </Container>
@@ -291,14 +271,34 @@ const AuthChooseProfilePicture = ({
 export default AuthChooseProfilePicture;
 
 const styles = StyleSheet.create({
-  containerCamera: {
-    flex: 1,
+  preview: {
+    width: "100%",
+    height: "100%",
+    // maxHeight: 360,
+    // maxWidth: 360,
+    borderRadius: 30,
+    overflow: "hidden",
+  },
+  camera: {
+    width: "100%",
+    height: "100%",
+    // maxHeight: 360,
+    // maxWidth: 360,
   },
   cameraHeader: {
     height: 75,
-    width: ScreenWidth,
+    width: SCREEN_WIDTH,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 15,
+  },
+  footer: {
+    flex: 1,
+    maxHeight: 100,
+    width: SCREEN_WIDTH,
+    alignItems: "center",
+    justifyContent: "space-around",
+    flexDirection: "row",
+    marginTop: 20,
   },
 });

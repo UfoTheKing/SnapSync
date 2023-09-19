@@ -7,11 +7,11 @@ import { AuthValidatePhoneNumber } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
 import Toast from "react-native-toast-message";
 import Container from "@/components/Container";
-import Logo from "@/components/AuthStack/Logo/Logo";
-import Form from "@/components/AuthStack/Form/Form";
-import BottomButton from "@/components/AuthStack/BottomButton/BottomButton";
+import Logo from "@/components/Auth/Logo/Logo";
+import BottomButton from "@/components/Auth/BottomButton/BottomButton";
 import { PlaceholderColor } from "@/constants/Layout";
 import { AuthStyles } from "../styles";
+import FormContainer from "@/components/Forms/FormContainer/FormContainer";
 
 const AuthInsertPhoneNumber = ({
   navigation,
@@ -84,7 +84,7 @@ const AuthInsertPhoneNumber = ({
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
-        behavior={"height"}
+        behavior={"padding"}
         style={{
           flex: 1,
           alignItems: "center",
@@ -92,7 +92,7 @@ const AuthInsertPhoneNumber = ({
       >
         <Logo title="It's almost there! Create your account using your phone number" />
 
-        <Form>
+        <FormContainer>
           <PhoneInput
             ref={phoneInputRef}
             initialCountry={userData.phoneNumberCountry?.iso}
@@ -112,7 +112,7 @@ const AuthInsertPhoneNumber = ({
             initialValue={userData.phoneNumberCountry?.phoneCode?.toString()}
             disabled={mutation.isLoading}
           />
-        </Form>
+        </FormContainer>
 
         <BottomButton
           label="Continue"

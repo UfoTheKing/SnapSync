@@ -6,10 +6,10 @@ import {
   ViewStyle,
 } from "react-native";
 import React from "react";
-import Avatar from "./User/Avatar";
-import Info from "./User/Info";
 import { INLINE_USER_HEIGHT } from "./User/styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Avatar from "./User/Avatar/Avatar";
+import Info from "./User/Info/Info";
 
 type Props = {
   username: string;

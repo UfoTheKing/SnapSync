@@ -4,6 +4,7 @@ import {
   RefreshControl,
   View,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -13,7 +14,6 @@ import { RootState } from "@/business/redux/app/store";
 import { useQuery } from "react-query";
 import { FetchTimeline } from "@/api/routes/feed";
 import Container from "@/components/Container";
-import Feed from "@/components/Feed/Feed";
 import { SmallUser } from "@/models/resources/User";
 import AnimatedHeader, {
   HEADER_HEIGHT,
@@ -24,7 +24,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { AntDesign } from "@expo/vector-icons";
 import { ScreenWidth } from "@/constants/Layout";
-import FeedSkeleton from "@/components/Feed/FeedSkeleton";
 
 type Props = {};
 
@@ -114,7 +113,7 @@ const HomeScreen = ({ navigation }: HomeStackScreenProps<"Home">) => {
           navigation.navigate("Root", { screen: "TabUserProfileStack" })
         }
       />
-      {timelineIsLoading ? (
+      {/* {timelineIsLoading ? (
         <Animated.FlatList
           data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
           keyExtractor={(_, index) => index.toString()}
@@ -151,7 +150,7 @@ const HomeScreen = ({ navigation }: HomeStackScreenProps<"Home">) => {
           }}
           scrollEnabled={true}
         />
-      )}
+      )} */}
       <View
         style={{
           ...styles.snapSyncContainer,
@@ -159,14 +158,14 @@ const HomeScreen = ({ navigation }: HomeStackScreenProps<"Home">) => {
         }}
       >
         <TouchableOpacity
-          onPress={() =>
+          onPress={() => {
             navigation.navigate("SnapSyncStack", {
               screen: "SnapSync",
               params: {
                 mode: "create",
               },
-            })
-          }
+            });
+          }}
         >
           <View style={styles.button}>
             <AntDesign name="sync" size={24} color="#e7e7e7" />

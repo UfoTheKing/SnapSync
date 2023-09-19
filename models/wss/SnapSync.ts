@@ -9,8 +9,12 @@ export interface SnapSyncData {
 
 export interface SnapSyncUser {
   id: number;
+  username: string;
+  profilePictureUrl: string;
   position: string;
   isJoined: boolean;
+
+  imageUrl?: string;
 }
 
 export interface SnapSyncTimer {

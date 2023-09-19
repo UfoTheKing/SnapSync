@@ -4,22 +4,12 @@ import client from "../client";
 const API_PATH = "/friendships";
 
 export const FetchUserFriends = async (
-  userId: number,
   tokenApi: string,
   page: number = 1,
   size: number = 10,
   query: string | null = null
 ): Promise<{
-  friends: {
-    user: {
-      id: number;
-      username: string;
-      fullName: string;
-      isVerified: boolean;
-      profilePictureUrl: string;
-    };
-    acceptedAt: Date;
-  }[];
+  friends: Array<SmallUser>;
   pagination: {
     page: number;
     size: number;
@@ -28,7 +18,40 @@ export const FetchUserFriends = async (
   };
 }> => {
   try {
-    const response = await client.get(`${API_PATH}/${userId}/friends`, {
+    const response = await client.get(`${API_PATH}/friends`, {
+      headers: {
+        Authorization: `Bearer ${tokenApi}`,
+      },
+      params: {
+        page: page && page > 0 ? page : 1,
+        size: size && size > 0 ? size : 10,
+        query: query ? query : null,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const FetchMutualFriends = async (
+  userId: number,
+  tokenApi: string,
+  page: number = 1,
+  size: number = 10,
+  query: string | null = null
+): Promise<{
+  users: Array<SmallUser>;
+  pagination: {
+    page: number;
+    size: number;
+    total: number;
+    hasMore: boolean;
+  };
+}> => {
+  try {
+    const response = await client.get(`${API_PATH}/${userId}/mutual_friends`, {
       headers: {
         Authorization: `Bearer ${tokenApi}`,
       },
@@ -51,10 +74,7 @@ export const FetchIncomingFriendRequests = async (
   size: number = 10,
   query: string | null = null
 ): Promise<{
-  pendingRequests: {
-    user: SmallUser;
-    pendingAt: Date;
-  }[];
+  requests: Array<SmallUser>;
   pagination: {
     page: number;
     size: number;
@@ -86,10 +106,7 @@ export const FetchOutgoingFriendRequests = async (
   size: number = 10,
   query: string | null = null
 ): Promise<{
-  pendingRequests: {
-    user: SmallUser;
-    pendingAt: Date;
-  }[];
+  requests: Array<SmallUser>;
   pagination: {
     page: number;
     size: number;

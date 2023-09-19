@@ -5,6 +5,8 @@ import type {
   CompositeScreenProps,
   NavigatorScreenParams,
 } from "@react-navigation/native";
+import { SnapShapePosition } from "./models/resources/SnapShapePosition";
+import { Shape } from "./models/project/Shape";
 
 declare global {
   namespace ReactNavigation {
@@ -19,6 +21,9 @@ export type RootStackParamList = {
     | undefined;
 
   SnapSyncStack: NavigatorScreenParams<SnapSyncStackParamList> | undefined;
+  EditProfileStack:
+    | NavigatorScreenParams<EditProfileStackParamList>
+    | undefined;
 
   // Not Logged
   AuthStack: NavigatorScreenParams<AuthStackParamList> | undefined;
@@ -118,7 +123,7 @@ export type UserProfileStackParamList = {
     profilePictureUrl?: string;
   };
 
-  FriendsList: {
+  MutualFriends: {
     userId: number;
     username: string;
     isVerified: boolean;
@@ -137,8 +142,17 @@ export type SnapSyncStackParamList = {
     mode: "create" | "join";
     key?: string;
   };
-  Invite: {
-    position: string;
+  TakeSnap: {
+    key: string;
+    cWidth: number;
+    cHeight: number;
+    shape: Shape;
+    position: SnapShapePosition;
+  };
+  PublishSnap: {
+    key: string;
+    image: string;
+    shape: Shape;
   };
 };
 
@@ -146,5 +160,29 @@ export type SnapSyncStackScreenProps<
   Screen extends keyof SnapSyncStackParamList
 > = CompositeScreenProps<
   NativeStackScreenProps<SnapSyncStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+/* ------------------------------------------------------ EDIT PROFILE ------------------------------------------------------ */
+export type EditProfileStackParamList = {
+  EditProfile: undefined;
+  EditProfileUsername: {
+    username: string;
+  };
+  EditProfileFullName: {
+    fullName: string;
+  };
+  EditProfileBio: {
+    biography: string | null;
+  };
+
+  EditProfileProfilePictureTakePhoto: undefined;
+  EditProfileProfilePictureChooseFromLibrary: undefined;
+};
+
+export type EditProfileStackScreenProps<
+  Screen extends keyof EditProfileStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<EditProfileStackParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;
