@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import React, { useCallback, useMemo, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
 import { useQuery } from "react-query";
 import { FetchWebFormData } from "@/api/routes/accounts";
@@ -18,6 +18,7 @@ import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomSheetModalCustomBackdrop from "@/components/BottomSheetModal/BottomSheetModalCustomBackdrop/BottomSheetModalCustomBackdrop";
 import BottomSheetModalItem from "@/components/BottomSheetModal/BottomSheetModalItem/BottomSheetModalItem";
 import { RootStyles } from "@/screens/RootStack/styles";
+import { reset } from "@/business/redux/features/editprofile/editProfileSlice";
 
 const EditProfile = ({
   navigation,
@@ -26,6 +27,10 @@ const EditProfile = ({
   const user = useSelector((state: RootState) => state.user.user);
   const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
   const tokenApi = useSelector((state: RootState) => state.user.tokenApi);
+  const uriProfilePicture = useSelector(
+    (state: RootState) => state.editProfile.uriProfilePicture
+  );
+  const dispatch = useDispatch();
 
   // HOOKS
   const insets = useSafeAreaInsets();
@@ -79,6 +84,37 @@ const EditProfile = ({
         ...RootStyles.headerTitleStyle,
       },
       headerTitleAlign: "center",
+      headerRight: () => {
+        // if (!uriProfilePicture) return null;
+
+        return (
+          <TouchableOpacity
+            // disabled={mutation.isLoading || !formik.dirty}
+            onPress={handlePressEnd}
+          >
+            {false ? (
+              <Spinner size="sm" />
+            ) : (
+              <Text
+                style={{
+                  color: colors.primary[900],
+                  fontWeight: "500",
+                  fontSize: 12,
+                }}
+              >
+                End
+              </Text>
+            )}
+          </TouchableOpacity>
+        );
+      },
+    });
+  }, [navigation, uriProfilePicture]);
+
+  React.useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      dismissAll();
+      dispatch(reset());
     });
   }, [navigation]);
 
@@ -89,6 +125,9 @@ const EditProfile = ({
   );
 
   // FUNCTIONS
+  const handlePressEnd = () => {
+    console.log("handlePressEnd", uriProfilePicture);
+  };
 
   if (isLoading) {
     return (
@@ -117,11 +156,14 @@ const EditProfile = ({
             styles.avatarEdit,
             {
               right: (ScreenWidth - insets.left - insets.right) / 2 - 45,
+              backgroundColor: colors.primary[900],
+              borderColor: "#fff",
+              borderWidth: 4,
             },
           ]}
           onPress={handlePresentModalPress}
         >
-          <Ionicons name="pencil" size={16} color={colors.primary[900]} />
+          <Ionicons name="pencil" size={12} color={"white"} />
         </TouchableOpacity>
       </View>
       <View style={[styles.bottom]}>

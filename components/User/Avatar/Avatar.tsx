@@ -1,4 +1,4 @@
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, View, ViewStyle, Text } from "react-native";
 import React from "react";
 import { Image } from "expo-image";
 import { AVATAR_SIZE } from "../styles";
@@ -10,20 +10,15 @@ type Props = {
   isLoading?: boolean;
   size?: number;
 
-  isJoined?: boolean;
-  showStatus?: boolean;
-
   containerStyle?: StyleProp<ViewStyle>;
+
+  streak?: number;
+  showStreak?: boolean;
 };
 
 const Avatar = (props: Props) => {
-  const {
-    profilePictureUrl,
-    isLoading = false,
-    size = AVATAR_SIZE,
-    isJoined = false,
-    showStatus = false,
-  } = props;
+  const { profilePictureUrl, isLoading = false, size = AVATAR_SIZE } = props;
+
   return (
     <View
       style={[
@@ -43,8 +38,6 @@ const Avatar = (props: Props) => {
           style={{ ...StyleSheet.absoluteFillObject, borderRadius: 100 }}
         />
       ) : null}
-
-      {isJoined && showStatus && !isLoading && <View style={styles.status} />}
     </View>
   );
 };
@@ -55,16 +48,5 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 100,
     backgroundColor: "#ccc",
-  },
-  status: {
-    position: "absolute",
-    bottom: -2.5,
-    right: 0,
-    width: 15,
-    height: 15,
-    borderRadius: 100,
-    backgroundColor: "green",
-    borderWidth: 1,
-    borderColor: LightBackground,
   },
 });

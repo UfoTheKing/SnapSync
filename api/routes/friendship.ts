@@ -7,7 +7,8 @@ export const FetchUserFriends = async (
   tokenApi: string,
   page: number = 1,
   size: number = 10,
-  query: string | null = null
+  query: string | null = null,
+  includeStreak: boolean = false
 ): Promise<{
   friends: Array<SmallUser>;
   pagination: {
@@ -26,6 +27,7 @@ export const FetchUserFriends = async (
         page: page && page > 0 ? page : 1,
         size: size && size > 0 ? size : 10,
         query: query ? query : null,
+        include_streak: includeStreak ? "true" : "false",
       },
     });
 

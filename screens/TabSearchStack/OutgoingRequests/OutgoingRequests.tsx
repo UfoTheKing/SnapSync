@@ -18,6 +18,7 @@ import { Divider, Spinner, useTheme } from "native-base";
 import ErrorText from "@/components/Error/ErrorText/ErrorText";
 import { ScreenHeight } from "@/constants/Layout";
 import { AntDesign } from "@expo/vector-icons";
+import DestroyButton from "@/components/User/Buttons/DestroyButton/DestroyButton";
 
 const OutgoingRequests = ({
   navigation,
@@ -86,24 +87,6 @@ const OutgoingRequests = ({
   }, [navigation, Platform]);
 
   // FUNCTIONS
-  const handlePressDestroyFriendship = (username: string, userId: number) => {
-    Alert.alert(
-      "Delete Request",
-      `Are you sure you want to delete your friend request to ${username}?`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Delete",
-          onPress: () => {
-            destroyFriendshipMutation.mutate(userId);
-          },
-        },
-      ]
-    );
-  };
 
   return (
     <Container
@@ -134,33 +117,19 @@ const OutgoingRequests = ({
                 <View
                   style={{
                     flex: 1,
-                    alignItems: "center",
+                    alignItems: "flex-end",
                     justifyContent: "center",
                   }}
                 >
-                  <TouchableOpacity
-                    style={{
-                      width: 30,
-                      height: 30,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 15,
-                    }}
+                  <DestroyButton
                     onPress={() => {
-                      handlePressDestroyFriendship(item.username, item.id);
+                      destroyFriendshipMutation.mutate(item.id);
                     }}
-                  >
-                    {destroyFriendshipMutation.isLoading &&
-                    destroyFriendshipMutation.variables === item.id ? (
-                      <Spinner size="sm" />
-                    ) : (
-                      <AntDesign
-                        name="close"
-                        size={16}
-                        color={colors.error[500]}
-                      />
-                    )}
-                  </TouchableOpacity>
+                    isLoading={
+                      destroyFriendshipMutation.isLoading &&
+                      destroyFriendshipMutation.variables === item.id
+                    }
+                  />
                 </View>
               }
             />

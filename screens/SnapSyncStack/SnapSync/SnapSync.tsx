@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import React, { useCallback, useMemo, useRef } from "react";
 import { SnapSyncStackScreenProps } from "@/types";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,27 +23,26 @@ import {
   setTimerCompleted,
   updateSnapSyncData,
 } from "@/business/redux/features/snapsync/snapSyncSlice";
-import ErrorHandler from "@/components/Error/ErrorHandler/ErrorHandler";
-import ErrorText from "@/components/Error/ErrorText/ErrorText";
-import SnapSyncMenu from "@/components/SnapSync/SnapSyncMenu/SnapSyncMenu";
 import { ScreenHeight, ScreenWidth } from "@/constants/Layout";
-import SnapSyncGrid from "@/components/SnapSync/SnapSyncGrid/SnapSyncGrid";
 import { CreateSnapInstanceDto } from "@/models/dto/SnapSync";
-import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
+import {
+  BottomSheetModal,
+  SCREEN_WIDTH,
+  useBottomSheetModal,
+} from "@gorhom/bottom-sheet";
 import BottomSheetModalCustomBackdrop from "@/components/BottomSheetModal/BottomSheetModalCustomBackdrop/BottomSheetModalCustomBackdrop";
 import { FetchUserFriends } from "@/api/routes/friendship";
-import Inline from "@/components/User/Inline/Inline";
-import { FlashList } from "@shopify/flash-list";
-import { INLINE_USER_HEIGHT } from "@/components/User/styles";
 import { SmallUser } from "@/models/resources/User";
 import { SystemMessage } from "@/models/wss/SystemMessage";
 import { ErrorMessage } from "@/models/wss/ErrorMessage";
 import Toast from "react-native-toast-message";
-import SnapSyncTitle from "@/components/SnapSync/SnapSyncTitle/SnapSyncTitle";
 import { Camera } from "expo-camera";
-import GoBackButton from "@/components/GoBackButton";
 import useCountdown from "@bradgarropy/use-countdown";
-import { Image } from "expo-image";
+import SnapSyncItem from "@/components/SnapSync/SnapSyncItem/SnapSyncItem";
+import { FlashList } from "@shopify/flash-list";
+import Inline from "@/components/User/Inline/Inline";
+import { INLINE_USER_HEIGHT } from "@/components/User/styles";
+import SyncButton from "@/components/User/Buttons/SyncButton/SyncButton";
 
 const SnapSync = ({
   navigation,
@@ -132,10 +131,11 @@ const SnapSync = ({
     refetch: refetchFriends,
     isRefetching: isRefetchingFriends,
   } = useInfiniteQuery(
-    ["user", "friends", tokenApi],
-    ({ pageParam = 1 }) => FetchUserFriends(tokenApi, pageParam, 10, null),
+    ["user", "friends", "streak", tokenApi],
+    ({ pageParam = 1 }) =>
+      FetchUserFriends(tokenApi, pageParam, 10, null, true),
     {
-      enabled: false,
+      enabled: isLoggedIn,
       getNextPageParam: (lastPage) => {
         if (lastPage.pagination.hasMore) {
           return lastPage.pagination.page + 1;
@@ -394,263 +394,335 @@ const SnapSync = ({
     dispatch(setTimerCompleted(true));
   };
 
-  if (!ws || !isLogged) {
-    return (
-      <Container textCenter>
-        <ErrorText message="There is no connection to the server. Please try again later" />
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text
-            style={{
-              color: colors.red[500],
-              fontSize: 16,
-              fontWeight: "bold",
-              marginTop: 10,
-            }}
-          >
-            Leave
-          </Text>
-        </TouchableOpacity>
-      </Container>
-    );
-  }
-
-  if (mode === "create") {
-    if (isLoading) {
-      return (
-        <Container textCenter>
-          <Spinner size="sm" />
-        </Container>
-      );
-    }
-
-    if (isError || !shapes) {
-      return (
-        <Container textCenter>
-          <ErrorHandler error={error} />
-        </Container>
-      );
-    }
-
-    if (shapes.shapes.length === 0) {
-      return (
-        <Container textCenter>
-          <ErrorText message="Ops! There is no shape available for SnapSync" />
-        </Container>
-      );
-    }
-  }
-
-  if (mode === "join") {
-    if (isLoadingCheck || isLoadingJoin) {
-      return (
-        <Container textCenter>
-          <Spinner size="sm" />
-        </Container>
-      );
-    }
-
-    if (isErrorCheck) {
-      return (
-        <Container textCenter>
-          <ErrorHandler error={errorCheck} />
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text
-              style={{
-                color: colors.red[500],
-                fontSize: 16,
-                fontWeight: "bold",
-                marginTop: 10,
-              }}
-            >
-              Exit
-            </Text>
-          </TouchableOpacity>
-        </Container>
-      );
-    }
-  }
-
-  if (!initialShape) {
-    return null;
-  }
-
-  if (users.length === 0) {
-    return (
-      <Container textCenter>
-        <ErrorText message="Ops! Something went wrong" />
-      </Container>
-    );
-  }
-
-  if (!permission) return null;
-
-  if (!permission.granted) {
-    return (
-      <Container textCenter>
-        <ErrorText message="Ops! You need to grant camera permission to use SnapSync" />
-      </Container>
-    );
-  }
-
-  if (snap.uri) {
-    return (
-      <Container textCenter>
-        <Image source={{ uri: snap.uri }} style={{ width: 270, height: 480 }} />
-      </Container>
-    );
-  }
-
   return (
-    <Container
-      safeAreaLeft={false}
-      safeAreaRight={false}
-      safeAreaTop={false}
-      safeAreaBottom={false}
-    >
-      <View
-        style={[
-          styles.grid,
-          {
-            // maxHeight: ScreenHeight,
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: insets.top,
-            // maxHeight: initialShape.height,
-            // maxWidth: initialShape.width,
-            marginBottom: insets.bottom,
-          },
-        ]}
-        // onLayout={(e) => {
-        //   setLayout({
-        //     h: e.nativeEvent.layout.height,
-        //     w: e.nativeEvent.layout.width,
-        //   });
-        // }}
-      >
-        <SnapSyncGrid
-          shape={initialShape}
-          cHeight={
-            Math.floor(layout.w / shapeRatio) - 50 - insets.top - insets.bottom
-          }
-          cWidth={Math.floor(
-            layout.w - (50 + insets.top + insets.bottom) * shapeRatio
-          )}
-          handlePressAddUser={handlePressInvite}
-        />
+    <Container>
+      <FlashList
+        data={
+          friends && friends.pages && friends.pages.length > 0
+            ? friends.pages
+                .map((page) => (page.friends ? page.friends : []))
+                .flat()
+            : []
+        }
+        renderItem={({ item, index }) => {
+          return (
+            <Inline
+              disabled
+              key={item.id}
+              user={item}
+              containerStyle={{
+                paddingHorizontal: insets.left + 15,
+                marginTop: index === 0 ? 15 : 0,
+              }}
+              rightComponent={
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: "flex-end",
+                    justifyContent: "center",
+                  }}
+                >
+                  <SyncButton
+                    // isLoading={unfriendMutation.isLoading}
+                    onPress={() => {
+                      // setUser(item);
+                      // handlePresentModalPress();
+                    }}
+                  />
+                </View>
+              }
+            />
+          );
+        }}
+        keyExtractor={(_, index) => index.toString()}
+        estimatedItemSize={INLINE_USER_HEIGHT}
+        onEndReached={() => {
+          if (hasNextPageFriends) fetchNextPageFriends();
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingNextPageFriends ? <Spinner size="sm" /> : undefined
+        }
+        ItemSeparatorComponent={() => <Divider my={2} />}
+      />
 
-        <View
+      {/* <SnapSyncItem
+        leftImage="https://wallpapers.com/images/high/1080x1080-xbox-random-stuff-6vmseb62ce9zbijt.webp"
+        rightImage="https://wallpapers.com/images/high/1080x1080-xbox-forza-motorsport-7jnx2btyiz2tm5ht.webp"
+      />
+
+      <TouchableOpacity onPress={() => navigation.goBack()}>
+        <Text
           style={{
-            height: 50 + insets.bottom,
-            width: ScreenWidth,
-            paddingLeft: insets.left,
-            paddingRight: insets.right,
-            alignItems: "center",
-            justifyContent: "center",
-            // paddingBottom: insets.bottom
+            color: colors.red[500],
+            fontSize: 16,
+            fontWeight: "bold",
+            marginTop: 10,
           }}
         >
-          <SnapSyncTitle
-            message={
-              snapSync
-                ? snapSync.timer.start
-                  ? snapSync.title.replaceAll(
-                      "{{timer}}",
-                      countdown.seconds.toString()
-                    )
-                  : snapSync.title
-                : "Invite your friends and start syncing!"
-            }
-          />
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            disabled={isLoadingCreate}
-          >
-            <Text
-              style={{
-                color: colors.red[500],
-                fontSize: 16,
-                fontWeight: "bold",
-                marginTop: 10,
-              }}
-            >
-              Leave
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {snapSync ? null : mode === "create" && initialShape ? (
-        <SnapSyncMenu
-          selectedShape={initialShape}
-          shapes={shapes ? shapes.shapes : []}
-          onChange={handleChangeShape}
-          disabled={isLoadingCreate}
-        />
-      ) : null}
-
-      <BottomSheetModal
-        ref={bottomSheetModalRef}
-        index={0}
-        snapPoints={snapPoints}
-        backdropComponent={renderBackdrop}
-      >
-        <View style={{ flex: 1, backgroundColor: "#fff" }}>
-          <FlashList
-            data={
-              friends && friends.pages && friends.pages.length > 0
-                ? friends.pages
-                    .map((page) => (page.friends ? page.friends : []))
-                    .flat()
-                    .filter(
-                      (f) => users.find((u) => u.id === f.id) === undefined
-                    )
-                : []
-            }
-            renderItem={({ item, index }) => {
-              return (
-                <Inline
-                  onPress={() => handleAddUser(item)}
-                  // disabled
-                  key={item.id}
-                  user={item}
-                  containerStyle={{
-                    paddingHorizontal: 15,
-                    marginTop: index === 0 ? 15 : 0,
-                  }}
-                />
-              );
-            }}
-            keyExtractor={(_, index) => index.toString()}
-            estimatedItemSize={INLINE_USER_HEIGHT}
-            onEndReached={() => {
-              if (hasNextPageFriends) fetchNextPageFriends();
-            }}
-            onEndReachedThreshold={0.5}
-            ListFooterComponent={
-              isFetchingNextPageFriends ? <Spinner size="sm" /> : undefined
-            }
-            ItemSeparatorComponent={() => <Divider my={2} />}
-            ListEmptyComponent={
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: ScreenHeight - 200,
-                }}
-              >
-                {isLoading ? (
-                  <Spinner size="sm" />
-                ) : isError ? (
-                  <ErrorHandler error={error} />
-                ) : null}
-              </View>
-            }
-          />
-        </View>
-      </BottomSheetModal>
+          Leave
+        </Text>
+      </TouchableOpacity> */}
     </Container>
   );
+
+  // if (!ws || !isLogged) {
+  //   return (
+  //     <Container textCenter>
+  //       <ErrorText message="There is no connection to the server. Please try again later" />
+  //       <TouchableOpacity onPress={() => navigation.goBack()}>
+  //         <Text
+  //           style={{
+  //             color: colors.red[500],
+  //             fontSize: 16,
+  //             fontWeight: "bold",
+  //             marginTop: 10,
+  //           }}
+  //         >
+  //           Leave
+  //         </Text>
+  //       </TouchableOpacity>
+  //     </Container>
+  //   );
+  // }
+
+  // if (mode === "create") {
+  //   if (isLoading) {
+  //     return (
+  //       <Container textCenter>
+  //         <Spinner size="sm" />
+  //       </Container>
+  //     );
+  //   }
+
+  //   if (isError || !shapes) {
+  //     return (
+  //       <Container textCenter>
+  //         <ErrorHandler error={error} />
+  //       </Container>
+  //     );
+  //   }
+
+  //   if (shapes.shapes.length === 0) {
+  //     return (
+  //       <Container textCenter>
+  //         <ErrorText message="Ops! There is no shape available for SnapSync" />
+  //       </Container>
+  //     );
+  //   }
+  // }
+
+  // if (mode === "join") {
+  //   if (isLoadingCheck || isLoadingJoin) {
+  //     return (
+  //       <Container textCenter>
+  //         <Spinner size="sm" />
+  //       </Container>
+  //     );
+  //   }
+
+  //   if (isErrorCheck) {
+  //     return (
+  //       <Container textCenter>
+  //         <ErrorHandler error={errorCheck} />
+  //         <TouchableOpacity onPress={() => navigation.goBack()}>
+  //           <Text
+  //             style={{
+  //               color: colors.red[500],
+  //               fontSize: 16,
+  //               fontWeight: "bold",
+  //               marginTop: 10,
+  //             }}
+  //           >
+  //             Exit
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </Container>
+  //     );
+  //   }
+  // }
+
+  // if (!initialShape) {
+  //   return null;
+  // }
+
+  // if (users.length === 0) {
+  //   return (
+  //     <Container textCenter>
+  //       <ErrorText message="Ops! Something went wrong" />
+  //     </Container>
+  //   );
+  // }
+
+  // if (!permission) return null;
+
+  // if (!permission.granted) {
+  //   return (
+  //     <Container textCenter>
+  //       <ErrorText message="Ops! You need to grant camera permission to use SnapSync" />
+  //     </Container>
+  //   );
+  // }
+
+  // if (snap.uri) {
+  //   return (
+  //     <Container textCenter>
+  //       <Image source={{ uri: snap.uri }} style={{ width: 270, height: 480 }} />
+  //     </Container>
+  //   );
+  // }
+
+  // return (
+  //   <Container
+  //     safeAreaLeft={false}
+  //     safeAreaRight={false}
+  //     safeAreaTop={false}
+  //     safeAreaBottom={false}
+  //   >
+  //     <View
+  //       style={[
+  //         styles.grid,
+  //         {
+  //           // maxHeight: ScreenHeight,
+  //           alignItems: "center",
+  //           justifyContent: "center",
+  //           marginTop: insets.top,
+  //           // maxHeight: initialShape.height,
+  //           // maxWidth: initialShape.width,
+  //           marginBottom: insets.bottom,
+  //         },
+  //       ]}
+  //       // onLayout={(e) => {
+  //       //   setLayout({
+  //       //     h: e.nativeEvent.layout.height,
+  //       //     w: e.nativeEvent.layout.width,
+  //       //   });
+  //       // }}
+  //     >
+  //       <SnapSyncGrid
+  //         shape={initialShape}
+  //         cHeight={
+  //           Math.floor(layout.w / shapeRatio) - 50 - insets.top - insets.bottom
+  //         }
+  //         cWidth={Math.floor(
+  //           layout.w - (50 + insets.top + insets.bottom) * shapeRatio
+  //         )}
+  //         handlePressAddUser={handlePressInvite}
+  //       />
+
+  //       <View
+  //         style={{
+  //           height: 50 + insets.bottom,
+  //           width: ScreenWidth,
+  //           paddingLeft: insets.left,
+  //           paddingRight: insets.right,
+  //           alignItems: "center",
+  //           justifyContent: "center",
+  //           // paddingBottom: insets.bottom
+  //         }}
+  //       >
+  //         <SnapSyncTitle
+  //           message={
+  //             snapSync
+  //               ? snapSync.timer.start
+  //                 ? snapSync.title.replaceAll(
+  //                     "{{timer}}",
+  //                     countdown.seconds.toString()
+  //                   )
+  //                 : snapSync.title
+  //               : "Invite your friends and start syncing!"
+  //           }
+  //         />
+  //         <TouchableOpacity
+  //           onPress={() => navigation.goBack()}
+  //           disabled={isLoadingCreate}
+  //         >
+  //           <Text
+  //             style={{
+  //               color: colors.red[500],
+  //               fontSize: 16,
+  //               fontWeight: "bold",
+  //               marginTop: 10,
+  //             }}
+  //           >
+  //             Leave
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </View>
+
+  //     {snapSync ? null : mode === "create" && initialShape ? (
+  //       <SnapSyncMenu
+  //         selectedShape={initialShape}
+  //         shapes={shapes ? shapes.shapes : []}
+  //         onChange={handleChangeShape}
+  //         disabled={isLoadingCreate}
+  //       />
+  //     ) : null}
+
+  //     <BottomSheetModal
+  //       ref={bottomSheetModalRef}
+  //       index={0}
+  //       snapPoints={snapPoints}
+  //       backdropComponent={renderBackdrop}
+  //     >
+  //       <View style={{ flex: 1, backgroundColor: "#fff" }}>
+  //         <FlashList
+  //           data={
+  //             friends && friends.pages && friends.pages.length > 0
+  //               ? friends.pages
+  //                   .map((page) => (page.friends ? page.friends : []))
+  //                   .flat()
+  //                   .filter(
+  //                     (f) => users.find((u) => u.id === f.id) === undefined
+  //                   )
+  //               : []
+  //           }
+  //           renderItem={({ item, index }) => {
+  //             return (
+  //               <Inline
+  //                 onPress={() => handleAddUser(item)}
+  //                 // disabled
+  //                 key={item.id}
+  //                 user={item}
+  //                 containerStyle={{
+  //                   paddingHorizontal: 15,
+  //                   marginTop: index === 0 ? 15 : 0,
+  //                 }}
+  //               />
+  //             );
+  //           }}
+  //           keyExtractor={(_, index) => index.toString()}
+  //           estimatedItemSize={INLINE_USER_HEIGHT}
+  //           onEndReached={() => {
+  //             if (hasNextPageFriends) fetchNextPageFriends();
+  //           }}
+  //           onEndReachedThreshold={0.5}
+  //           ListFooterComponent={
+  //             isFetchingNextPageFriends ? <Spinner size="sm" /> : undefined
+  //           }
+  //           ItemSeparatorComponent={() => <Divider my={2} />}
+  //           ListEmptyComponent={
+  //             <View
+  //               style={{
+  //                 flex: 1,
+  //                 alignItems: "center",
+  //                 justifyContent: "center",
+  //                 height: ScreenHeight - 200,
+  //               }}
+  //             >
+  //               {isLoading ? (
+  //                 <Spinner size="sm" />
+  //               ) : isError ? (
+  //                 <ErrorHandler error={error} />
+  //               ) : null}
+  //             </View>
+  //           }
+  //         />
+  //       </View>
+  //     </BottomSheetModal>
+  //   </Container>
+  // );
 };
 
 export default SnapSync;

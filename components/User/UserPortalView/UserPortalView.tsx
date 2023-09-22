@@ -11,27 +11,34 @@ import { BlurView } from "expo-blur";
 import { INLINE_USER_HEIGHT } from "../styles";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenWidth } from "@/constants/Layout";
+import Avatar from "../Avatar/Avatar";
 
 type Props = {
-  userId: number;
   coordinates: { x: number; y: number };
   onDismiss: () => void;
+
+  user: {
+    id: number;
+    profilePictureUrl: string;
+    username: string;
+    fullName: string;
+  };
 };
 
 const UserPortalView = (props: Props) => {
-  const { userId, coordinates, onDismiss } = props;
+  const { coordinates, onDismiss, user } = props;
 
   const insets = useSafeAreaInsets();
 
   const [height] = useState(new Animated.Value(INLINE_USER_HEIGHT));
 
-  React.useEffect(() => {
-    Animated.timing(height, {
-      toValue: 350,
-      duration: 250,
-      useNativeDriver: false,
-    }).start();
-  }, []);
+  // React.useEffect(() => {
+  //   Animated.timing(height, {
+  //     toValue: 350,
+  //     duration: 250,
+  //     useNativeDriver: false,
+  //   }).start();
+  // }, []);
 
   return (
     <Portal>
@@ -44,16 +51,16 @@ const UserPortalView = (props: Props) => {
             style={[
               styles.container,
               {
-                height: height,
+                height: INLINE_USER_HEIGHT,
                 top: coordinates.y,
                 position: "absolute",
-                width: ScreenWidth - 15,
+                width: ScreenWidth,
+                paddingHorizontal: 15,
+                justifyContent: "center",
               },
             ]}
           >
-            <Text>
-              {coordinates.x} {coordinates.y}
-            </Text>
+            <Avatar profilePictureUrl={user.profilePictureUrl} />
           </Animated.View>
         </TouchableOpacity>
       </BlurView>
@@ -65,7 +72,7 @@ export default UserPortalView;
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
+    borderRadius: 6,
     backgroundColor: "white",
   },
 });

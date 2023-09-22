@@ -23,7 +23,7 @@ const MutualFriends = (props: Props) => {
 
     if (more > 0) r += ` and ${more} more`;
 
-    r += `are friends with ${props.username}`;
+    r += ` are friends with ${props.username}`;
 
     return r;
   }, []);
@@ -39,7 +39,7 @@ const MutualFriends = (props: Props) => {
             key={index}
             style={{
               position: "relative",
-              left: -index * 15,
+              left: -index * 30,
               zIndex: 100 - index,
               width: SIZE,
               height: SIZE,

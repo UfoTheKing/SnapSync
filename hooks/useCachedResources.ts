@@ -10,6 +10,7 @@ import {
 } from "@/business/secure-store/AuthToken";
 import { AuthLogInAuthToken } from "@/api/routes/auth";
 import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
+import { AsyncStorageRemoveExpoPushToken } from "@/business/async-storage/ExpoPushToken";
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -35,6 +36,7 @@ export default function useCachedResources() {
             }
           } catch (e) {
             await removeAuthToken();
+            await AsyncStorageRemoveExpoPushToken();
           }
         }
 

@@ -154,6 +154,7 @@ const AuthChooseProfilePicture = ({
           style={{
             flex: 1,
             alignItems: "center",
+            justifyContent: "center",
           }}
         >
           <Image

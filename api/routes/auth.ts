@@ -136,52 +136,37 @@ export const AuthResendOtp = async (
   }
 };
 
-export const AuthValidateUsername = async (
-  username: string,
-  sessionId: string
-): Promise<{
-  message: string;
-}> => {
-  try {
-    const { data } = await client.post(`${API_PATH}/username`, {
-      username,
-      sessionId,
-    });
+// export const AuthValidateUsername = async (
+//   username: string,
+//   sessionId: string
+// ): Promise<{
+//   message: string;
+// }> => {
+//   try {
+//     const { data } = await client.post(`${API_PATH}/username`, {
+//       username,
+//       sessionId,
+//     });
 
-    return data;
-  } catch (error) {
-    throw error;
-  }
-};
+//     return data;
+//   } catch (error) {
+//     throw error;
+//   }
+// };
 
 export const AuthSignUp = async (
-  uri: string,
+  username: string,
   sessionId: string
 ): Promise<ILoginResponse> => {
   const deviceUuid = await getDeviceUuid();
 
   try {
-    const response = await FileSystem.uploadAsync(
-      `${API_URL}${API_PATH}/signup`,
-      uri,
-      {
-        fieldName: "avatar",
-        httpMethod: "POST",
-        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-        headers: {
-          DeviceUuid: deviceUuid ? deviceUuid : "",
-        },
-        parameters: {
-          sessionId,
-        },
-      }
-    );
-    if (response.status > 299) {
-      let error: ErrorResponseType = JSON.parse(response.body);
-      throw error;
-    }
+    const { data } = await client.post(`${API_PATH}/signup`, {
+      username,
+      sessionId,
+    });
 
-    return JSON.parse(response.body);
+    return data;
   } catch (error) {
     throw error;
   }

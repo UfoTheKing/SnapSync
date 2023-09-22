@@ -2,7 +2,7 @@ import { KeyboardAvoidingView, TextInput } from "react-native";
 import React from "react";
 import { AuthStackScreenProps } from "@/types";
 import { useMutation, useQuery } from "react-query";
-import { AuthValidateUsername } from "@/api/routes/auth";
+import { AuthSignUp } from "@/api/routes/auth";
 import { instanceOfErrorResponseType } from "@/api/client";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
@@ -15,12 +15,19 @@ import BottomButton from "@/components/Auth/BottomButton/BottomButton";
 import { FetchUsernameRules } from "@/api/routes/accounts";
 import ErrorHandler from "@/components/Error/ErrorHandler/ErrorHandler";
 import FormContainer from "@/components/Forms/FormContainer/FormContainer";
+import { storeAuthToken } from "@/business/secure-store/AuthToken";
+import { storeDeviceUuid } from "@/business/secure-store/DeviceUuid";
+import { useDispatch } from "react-redux";
+import { login } from "@/business/redux/features/user/userSlice";
 
 const AuthInsertUsername = ({
   navigation,
   route,
 }: AuthStackScreenProps<"AuthInsertUsername">) => {
   const { userData } = route.params;
+
+  // REDUX
+  const dispatch = useDispatch();
 
   // REFS
   const inputRef = React.useRef<TextInput>(null);
@@ -30,20 +37,19 @@ const AuthInsertUsername = ({
   // MUTATIONS
   const mutation = useMutation(
     (data: { username: string; sessionId: string }) =>
-      AuthValidateUsername(data.username, data.sessionId),
+      AuthSignUp(data.username, data.sessionId),
     {
-      onSuccess: (data) => {
-        navigation.navigate("AuthChooseProfilePicture", {
-          userData: {
-            ...userData,
-            username: userData.username.trim().toLocaleLowerCase(),
-          },
-        });
+      onSuccess: async (data) => {
+        // Faccio il login
+        await storeAuthToken(data.accessToken);
+        await storeDeviceUuid(data.device.uuid);
+        dispatch(login(data));
       },
       onError: (error) => {
-        let message = "Something went wrong";
-        if (error && instanceOfErrorResponseType(error))
+        let message = "An error occurred";
+        if (error && instanceOfErrorResponseType(error)) {
           message = error.message;
+        }
 
         Toast.show({
           type: "error",
@@ -164,7 +170,7 @@ const AuthInsertUsername = ({
         </FormContainer>
 
         <BottomButton
-          label="Continue"
+          label="Get Started"
           onPress={handlePressContinue}
           isLoading={mutation.isLoading}
           disabled={

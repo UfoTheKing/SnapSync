@@ -21,6 +21,8 @@ import ErrorText from "@/components/Error/ErrorText/ErrorText";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AcceptButton from "@/components/User/Buttons/AcceptButton/AcceptButton";
+import DestroyButton from "@/components/User/Buttons/DestroyButton/DestroyButton";
 
 type Props = {
   onPressUsername?: (user: SmallUser) => void;
@@ -183,56 +185,28 @@ const PendingRoute = (props: Props) => {
                     flexDirection: "row",
                   }}
                 >
-                  <TouchableOpacity
-                    style={{
-                      width: 30,
-                      height: 30,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 15,
-                    }}
+                  <AcceptButton
                     onPress={() => {
                       acceptFriendRequestMutation.mutate(item.id);
                     }}
-                  >
-                    {(acceptFriendRequestMutation.isLoading &&
-                      acceptFriendRequestMutation.variables === item.id) ||
-                    (rejectFriendshipMutation.isLoading &&
-                      rejectFriendshipMutation.variables === item.id) ? (
-                      <Spinner size="sm" />
-                    ) : (
-                      <AntDesign
-                        name="check"
-                        size={16}
-                        color={colors.success[900]}
-                      />
-                    )}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={{
-                      width: 30,
-                      height: 30,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      borderRadius: 15,
-                    }}
+                    isLoading={
+                      (acceptFriendRequestMutation.isLoading &&
+                        acceptFriendRequestMutation.variables === item.id) ||
+                      (rejectFriendshipMutation.isLoading &&
+                        rejectFriendshipMutation.variables === item.id)
+                    }
+                  />
+                  <DestroyButton
                     onPress={() => {
                       handlePressRejectFriendship(item.username, item.id);
                     }}
-                  >
-                    {(acceptFriendRequestMutation.isLoading &&
-                      acceptFriendRequestMutation.variables === item.id) ||
-                    (rejectFriendshipMutation.isLoading &&
-                      rejectFriendshipMutation.variables === item.id) ? (
-                      <Spinner size="sm" />
-                    ) : (
-                      <AntDesign
-                        name="close"
-                        size={16}
-                        color={colors.error[500]}
-                      />
-                    )}
-                  </TouchableOpacity>
+                    isLoading={
+                      (acceptFriendRequestMutation.isLoading &&
+                        acceptFriendRequestMutation.variables === item.id) ||
+                      (rejectFriendshipMutation.isLoading &&
+                        rejectFriendshipMutation.variables === item.id)
+                    }
+                  />
                 </View>
               }
             />

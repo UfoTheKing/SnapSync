@@ -6,15 +6,16 @@ import {
   View,
   Image,
   Button,
+  Alert,
 } from "react-native";
 import React, { useCallback, useMemo, useRef } from "react";
 import { UserProfileStackScreenProps } from "@/types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { isError, useMutation, useQuery, useQueryClient } from "react-query";
 import { Skeleton, useTheme } from "native-base";
 import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
-import { ShowFriendship } from "@/api/routes/friendship";
+import { BlockUser, ShowFriendship } from "@/api/routes/friendship";
 import { useFocusEffect } from "@react-navigation/native";
 import { FetchUserProfileById } from "@/api/routes/user";
 import { LightBackground } from "@/utils/theme";
@@ -35,6 +36,8 @@ import BottomSheetModalCustomBackdrop from "@/components/BottomSheetModal/Bottom
 import { Ionicons } from "@expo/vector-icons";
 import HeaderUsername from "@/components/UserProfile/HeaderUsername/HeaderUsername";
 import ErrorHandler from "@/components/Error/ErrorHandler/ErrorHandler";
+import { AsyncStorageRemoveExpoPushToken } from "@/business/async-storage/ExpoPushToken";
+import { instanceOfErrorResponseType } from "@/api/client";
 
 const UserProfile = ({
   navigation,
@@ -99,11 +102,45 @@ const UserProfile = ({
 
   // MUTATIONS
   const logOutMutation = useMutation(() => AuthLogOut(tokenApi), {
-    onSuccess: (data) => {
+    onSuccess: () => {
       clearGlobalCache();
     },
-    onError: (error) => {},
   });
+
+  const blockUserMutation = useMutation(
+    (userId: number) => BlockUser(userId, tokenApi),
+    {
+      onSuccess: (data) => {
+        if (friendshipsStatus && friendshipsStatus.isFriend) {
+          // Se era mio amico lo rimuovo dalla lista
+          queryClient.invalidateQueries(["user", "friends", tokenApi]);
+          queryClient.removeQueries(["user", "friends", tokenApi], {
+            exact: true,
+          });
+        } else if (friendshipsStatus && friendshipsStatus.incomingRequest) {
+          // Se avevo una richiesta in entrata la rimuovo dalla lista
+          queryClient.invalidateQueries([
+            "user",
+            "incoming_requests",
+            tokenApi,
+          ]);
+          queryClient.removeQueries(["user", "incoming_requests", tokenApi], {
+            exact: true,
+          });
+        } else if (friendshipsStatus && friendshipsStatus.outgoingRequest) {
+          // Se avevo una richiesta in uscita la rimuovo dalla lista
+          queryClient.invalidateQueries([
+            "user",
+            "outgoing_requests",
+            tokenApi,
+          ]);
+          queryClient.removeQueries(["user", "outgoing_requests", tokenApi], {
+            exact: true,
+          });
+        }
+      },
+    }
+  );
 
   // QUERIES
   const {
@@ -252,12 +289,26 @@ const UserProfile = ({
 
   const clearGlobalCache = async () => {
     await removeAuthToken();
+    await AsyncStorageRemoveExpoPushToken();
 
     queryClient.clear();
 
     dispatch(logoutWs());
     dispatch(logout());
   };
+
+  if (
+    userProfileIsError &&
+    userProfileError &&
+    instanceOfErrorResponseType(userProfileError) &&
+    userProfileError.statusCode === 401
+  ) {
+    return (
+      <Container textCenter>
+        <ErrorHandler error={userProfileError} />
+      </Container>
+    );
+  }
 
   return (
     <Container safeAreaTop={false}>
@@ -416,7 +467,9 @@ const UserProfile = ({
                 />
                 <BottomSheetModalItem
                   label="Block"
-                  onPress={() => {}}
+                  onPress={() => {
+                    dismissAll();
+                  }}
                   icon={<Ionicons name="lock-closed" size={16} color="black" />}
                 />
               </View>

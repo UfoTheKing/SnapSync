@@ -10,10 +10,11 @@ type Props = {
   isVerified?: boolean;
   fullName?: string;
 
-  isContact?: boolean;
-  showContact?: boolean;
-
   isLoading?: boolean;
+
+  sliceText?: boolean;
+
+  streak?: number;
 };
 
 const Info = (props: Props) => {
@@ -21,10 +22,12 @@ const Info = (props: Props) => {
     username,
     isVerified,
     fullName,
-    isContact = false,
-    showContact = false,
 
     isLoading = false,
+
+    sliceText = false,
+
+    streak,
   } = props;
 
   const colors = useTheme().colors;
@@ -38,7 +41,7 @@ const Info = (props: Props) => {
           <>
             <Text style={styles.username}>
               {username
-                ? username.length > 15
+                ? username.length > 15 && sliceText
                   ? username.slice(0, 15) + "..."
                   : username
                 : ""}
@@ -51,6 +54,21 @@ const Info = (props: Props) => {
                 style={{ marginLeft: 4 }}
               />
             )}
+            {streak !== undefined && streak >= 1 && (
+              <>
+                <Text
+                  style={[
+                    styles.username,
+                    {
+                      marginHorizontal: 4,
+                    },
+                  ]}
+                >
+                  •
+                </Text>
+                <Text style={[styles.username]}>{streak} 🔥</Text>
+              </>
+            )}
           </>
         )}
       </View>
@@ -58,25 +76,22 @@ const Info = (props: Props) => {
         <Skeleton h="3" rounded="md" mt={1} />
       ) : (
         <Text style={{ fontSize: 12, color: colors.gray[500] }}>
-          {fullName && fullName.length > 14
+          {fullName && fullName.length > 14 && sliceText
             ? fullName.slice(0, 14) + "..."
             : fullName}
         </Text>
       )}
-      {isContact && showContact ? (
-        <View style={styles.boxFromMyContacts}>
-          <AntDesign name="contacts" size={8} color={colors.gray[500]} />
-          <Text
-            style={{
-              fontSize: 10,
-              color: colors.gray[500],
-              marginLeft: 4,
-            }}
-          >
-            Contact
-          </Text>
-        </View>
-      ) : null}
+      {/* <View style={styles.boxFromMyContacts}>
+        <AntDesign
+          name="contacts"
+          size={12}
+          color={colors.gray[500]}
+          style={{ marginRight: 4 }}
+        />
+        <Text style={{ fontSize: 12, color: colors.gray[500] }}>
+          From contacts
+        </Text>
+      </View> */}
     </View>
   );
 };

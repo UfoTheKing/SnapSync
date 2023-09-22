@@ -160,7 +160,7 @@ const AuthInsertFullName = ({
   return (
     <Container dismissKeyboardEnabled>
       <KeyboardAvoidingView
-        behavior={"padding"}
+        behavior={"height"}
         style={{
           flex: 1,
           alignItems: "center",

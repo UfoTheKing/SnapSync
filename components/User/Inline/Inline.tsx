@@ -18,6 +18,8 @@ type Props = {
     fullName: string;
     profilePictureUrl: string;
     isVerified: boolean;
+
+    streak?: number;
   };
 
   rightComponent?: React.ReactNode;
@@ -27,20 +29,15 @@ type Props = {
   onPress?: () => void;
   onLongPress?: (e: GestureResponderEvent) => void;
   disabled?: boolean;
-
-  contact?: boolean;
-  showContact?: boolean;
 };
 
 const Inline = (props: Props) => {
   const {
-    user: { username, fullName, profilePictureUrl, isVerified },
+    user: { username, fullName, profilePictureUrl, isVerified, streak },
     containerStyle,
     onPress,
     onLongPress,
     disabled = false,
-    contact = false,
-    showContact = false,
   } = props;
 
   return (
@@ -56,8 +53,8 @@ const Inline = (props: Props) => {
             username={username}
             fullName={fullName}
             isVerified={isVerified}
-            isContact={contact}
-            showContact={showContact}
+            streak={streak}
+            sliceText={props.rightComponent !== undefined}
           />
         </View>
         <View style={styles.boxRightComponent}>{props.rightComponent}</View>

@@ -23,6 +23,9 @@ import { Host } from "react-native-portalize";
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
+import { LogBox } from "react-native";
+LogBox.ignoreLogs(["Sending"]);
+
 const queryClient = new QueryClient();
 
 export default function App() {

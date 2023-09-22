@@ -1,6 +1,7 @@
 import EditProfile from "@/screens/EditProfileStack/EditProfile/EditProfile";
 import EditProfileBio from "@/screens/EditProfileStack/EditProfileBio/EditProfileBio";
 import EditProfileFullName from "@/screens/EditProfileStack/EditProfileFullName/EditProfileFullName";
+import EditProfileProfilePictureTakePhoto from "@/screens/EditProfileStack/EditProfileProfilePictureTakePhoto/EditProfileProfilePictureTakePhoto";
 import EditProfileUsername from "@/screens/EditProfileStack/EditProfileUsername/EditProfileUsername";
 import { RootStyles } from "@/screens/RootStack/styles";
 import { EditProfileStackParamList } from "@/types";
@@ -47,6 +48,12 @@ const EditProfileStack = () => {
         name="EditProfileBio"
         component={EditProfileBio}
         options={{ title: "Biography" }}
+      />
+
+      <Stack.Screen
+        name="EditProfileProfilePictureTakePhoto"
+        component={EditProfileProfilePictureTakePhoto}
+        options={{ title: "Photo" }}
       />
     </Stack.Navigator>
   );
