@@ -124,7 +124,8 @@ const FriendsRoute = (props: Props) => {
     isRefetching,
   } = useInfiniteQuery(
     ["user", "friends", tokenApi],
-    ({ pageParam = 1 }) => FetchUserFriends(tokenApi, pageParam, 10, null),
+    ({ pageParam = 1 }) =>
+      FetchUserFriends(tokenApi, pageParam, 10, null, true),
     {
       enabled: isLoggedIn,
       getNextPageParam: (lastPage) => {

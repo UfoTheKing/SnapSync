@@ -161,10 +161,18 @@ export const AuthSignUp = async (
   const deviceUuid = await getDeviceUuid();
 
   try {
-    const { data } = await client.post(`${API_PATH}/signup`, {
-      username,
-      sessionId,
-    });
+    const { data } = await client.post(
+      `${API_PATH}/signup`,
+      {
+        username,
+        sessionId,
+      },
+      {
+        headers: {
+          DeviceUuid: deviceUuid,
+        },
+      }
+    );
 
     return data;
   } catch (error) {
@@ -177,7 +185,15 @@ export const AuthLogInAuthToken = async (
 ): Promise<ILoginResponse> => {
   try {
     const deviceUuid = await getDeviceUuid();
-    console.log("deviceUuid", deviceUuid);
+
+    if (!deviceUuid) {
+      let e: ErrorResponseType = {
+        message: "Ops! Something went wrong.",
+        statusCode: 500,
+      };
+
+      throw e;
+    }
 
     const { data: response } = await client.post(
       `${API_PATH}/login_auth_token`,

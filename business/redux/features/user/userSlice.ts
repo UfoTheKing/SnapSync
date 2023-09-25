@@ -53,10 +53,21 @@ export const userSlice = createSlice({
         state.user.biography = action.payload;
       }
     },
+    changeProfilePictureUrl: (state, action: PayloadAction<string>) => {
+      if (state.user) {
+        state.user.profilePictureUrl = action.payload;
+      }
+    },
   },
 });
 
-export const { login, logout, changeUsername, changeFullName, changeBio } =
-  userSlice.actions;
+export const {
+  login,
+  logout,
+  changeUsername,
+  changeFullName,
+  changeBio,
+  changeProfilePictureUrl,
+} = userSlice.actions;
 
 export default userSlice.reducer;

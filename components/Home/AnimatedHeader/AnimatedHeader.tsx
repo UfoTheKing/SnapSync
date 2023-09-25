@@ -11,14 +11,13 @@ import { VStack } from "native-base";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
+import { HEADER_HEIGHT } from "./styles";
 
 type Props = {
   animatedValue: SharedValue<number>;
   onPressFriends: () => void;
   onPressProfile: () => void;
 };
-
-export const HEADER_HEIGHT = 48;
 
 const AnimatedHeader = (props: Props) => {
   const { animatedValue } = props;
@@ -102,7 +101,6 @@ const AnimatedHeader = (props: Props) => {
               justifyContent: "center",
             }}
           >
-            {/** TODO: Change ICON */}
             <FontAwesome5 name="user-friends" size={24} color="black" />
           </VStack>
         </TouchableOpacity>

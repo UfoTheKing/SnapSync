@@ -58,7 +58,7 @@ const Info = (props: Props) => {
               <>
                 <Text
                   style={[
-                    styles.username,
+                    styles.streak,
                     {
                       marginHorizontal: 4,
                     },
@@ -66,7 +66,7 @@ const Info = (props: Props) => {
                 >
                   •
                 </Text>
-                <Text style={[styles.username]}>{streak} 🔥</Text>
+                <Text style={[styles.streak]}>{streak} 🔥</Text>
               </>
             )}
           </>
@@ -113,6 +113,11 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
+    fontWeight: "bold",
+  },
+  streak: {
+    fontSize: 8,
+    color: "gray",
     fontWeight: "bold",
   },
   boxFromMyContacts: {

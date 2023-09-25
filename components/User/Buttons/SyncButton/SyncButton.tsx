@@ -8,10 +8,11 @@ import { RIGHT_COMPONENT_MAX_WIDTH } from "../../styles";
 type Props = {
   onPress: () => void;
   isLoading?: boolean;
+  disabled?: boolean;
 };
 
 const SyncButton = (props: Props) => {
-  const { onPress, isLoading = false } = props;
+  const { onPress, isLoading = false, disabled = false } = props;
 
   const colors = useTheme().colors;
 
@@ -24,6 +25,7 @@ const SyncButton = (props: Props) => {
         styles.container,
       ]}
       onPress={onPress}
+      disabled={disabled}
     >
       {isLoading ? (
         <Spinner size="sm" color={colors.secondary[500]} />

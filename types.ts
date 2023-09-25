@@ -24,6 +24,9 @@ export type RootStackParamList = {
   EditProfileStack:
     | NavigatorScreenParams<EditProfileStackParamList>
     | undefined;
+  UserSettingsStack:
+    | NavigatorScreenParams<UserSettingsStackParamList>
+    | undefined;
 
   // Not Logged
   AuthStack: NavigatorScreenParams<AuthStackParamList> | undefined;
@@ -177,12 +180,32 @@ export type EditProfileStackParamList = {
   };
 
   EditProfileProfilePictureTakePhoto: undefined;
-  EditProfileProfilePictureChooseFromLibrary: undefined;
 };
 
 export type EditProfileStackScreenProps<
   Screen extends keyof EditProfileStackParamList
 > = CompositeScreenProps<
   NativeStackScreenProps<EditProfileStackParamList, Screen>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+/* ------------------------------------------------------ USER SETTINGS ------------------------------------------------------ */
+export type UserSettingsStackParamList = {
+  UserSettings: undefined;
+
+  // Security
+  UserSettingsDevices: undefined;
+
+  // Privacy
+  UserSettingsBlockedUsers: undefined;
+
+  // About
+  UserSettingsAbout: undefined;
+};
+
+export type UserSettingsStackScreenProps<
+  Screen extends keyof UserSettingsStackParamList
+> = CompositeScreenProps<
+  NativeStackScreenProps<UserSettingsStackParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;

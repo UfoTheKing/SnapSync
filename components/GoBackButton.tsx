@@ -1,9 +1,10 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import { AntDesign } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 export type GoBackButtonProps = {
   mode?: "light" | "dark";
+  type?: "down" | "back";
   onPress: () => void;
   disabled?: boolean;
 };
@@ -12,24 +13,18 @@ export const GO_BACK_BUTTON_LIGHT = "rgba(173, 191, 255, 0.3)";
 export const GO_BACK_BUTTON_DARK = "#2A3341";
 
 const GoBackButton = (props: GoBackButtonProps) => {
-  const { mode = "dark", onPress, disabled = false } = props;
+  const { mode = "dark", type = "back", onPress, disabled = false } = props;
 
   return (
     <TouchableOpacity
-      style={[
-        GoBackButtonStyles.button,
-        {
-          backgroundColor:
-            mode === "light" ? GO_BACK_BUTTON_LIGHT : GO_BACK_BUTTON_DARK,
-        },
-      ]}
+      style={[GoBackButtonStyles.button]}
       onPress={onPress}
       disabled={disabled}
     >
-      <AntDesign
-        name="arrowleft"
+      <Ionicons
+        name={type === "back" ? "chevron-back" : "chevron-down"}
         size={24}
-        color={props.mode === "light" ? "black" : "white"}
+        color={mode === "light" ? "white" : "black"}
       />
     </TouchableOpacity>
   );

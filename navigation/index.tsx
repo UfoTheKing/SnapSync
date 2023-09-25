@@ -15,6 +15,7 @@ import { WssActions } from "@/utils/wss";
 import { initWs, resetWs } from "@/business/redux/features/socket/socketSlice";
 import { createWssMessage } from "@/utils/utils";
 import EditProfileStack from "./EditProfileStack";
+import UserSettingsStack from "./UserSettingsStack";
 
 /**
  * A root stack navigator is often used for displaying modals on top of all other content.
@@ -126,6 +127,14 @@ const RootNavigation = ({ data }: Props) => {
           <Stack.Screen
             name="EditProfileStack"
             component={EditProfileStack}
+            options={{
+              headerShown: false,
+            }}
+          />
+
+          <Stack.Screen
+            name="UserSettingsStack"
+            component={UserSettingsStack}
             options={{
               headerShown: false,
             }}

@@ -2,8 +2,8 @@ import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import React, { useCallback, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/business/redux/app/store";
-import { useQuery } from "react-query";
-import { FetchWebFormData } from "@/api/routes/accounts";
+import { useMutation, useQuery, useQueryClient } from "react-query";
+import { ChangeProfilePicture, FetchWebFormData } from "@/api/routes/accounts";
 import { useFocusEffect } from "@react-navigation/native";
 import Container from "@/components/Container";
 import { Spinner, useTheme } from "native-base";
@@ -18,7 +18,14 @@ import { BottomSheetModal, useBottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomSheetModalCustomBackdrop from "@/components/BottomSheetModal/BottomSheetModalCustomBackdrop/BottomSheetModalCustomBackdrop";
 import BottomSheetModalItem from "@/components/BottomSheetModal/BottomSheetModalItem/BottomSheetModalItem";
 import { RootStyles } from "@/screens/RootStack/styles";
-import { reset } from "@/business/redux/features/editprofile/editProfileSlice";
+import {
+  reset,
+  setUriProfilePicture,
+} from "@/business/redux/features/editprofile/editProfileSlice";
+import * as ImagePicker from "expo-image-picker";
+import { instanceOfErrorResponseType } from "@/api/client";
+import Toast from "react-native-toast-message";
+import { changeProfilePictureUrl } from "@/business/redux/features/user/userSlice";
 
 const EditProfile = ({
   navigation,
@@ -36,6 +43,7 @@ const EditProfile = ({
   const insets = useSafeAreaInsets();
   const colors = useTheme().colors;
   const { dismissAll } = useBottomSheetModal();
+  const queryClient = useQueryClient();
 
   // REFS
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
@@ -63,6 +71,30 @@ const EditProfile = ({
   );
 
   // MUTATIONS
+  const mutation = useMutation(
+    (uri: string) => ChangeProfilePicture(uri, tokenApi),
+    {
+      onSuccess: (data) => {
+        if (user) {
+          dispatch(changeProfilePictureUrl(data.profilePictureUrl));
+          queryClient.refetchQueries(["user", user.id, "profile", tokenApi]);
+        }
+
+        navigation.goBack();
+      },
+      onError: (error) => {
+        let message = "Something went wrong";
+        if (error && instanceOfErrorResponseType(error))
+          message = error.message;
+
+        Toast.show({
+          type: "error",
+          text1: message,
+          position: "bottom",
+        });
+      },
+    }
+  );
 
   // QUERIES
   const { data, isLoading, isError, error, refetch, isRefetching } = useQuery(
@@ -92,7 +124,7 @@ const EditProfile = ({
             // disabled={mutation.isLoading || !formik.dirty}
             onPress={handlePressEnd}
           >
-            {false ? (
+            {mutation.isLoading ? (
               <Spinner size="sm" />
             ) : (
               <Text
@@ -109,7 +141,7 @@ const EditProfile = ({
         );
       },
     });
-  }, [navigation, uriProfilePicture]);
+  }, [navigation, mutation.isLoading]);
 
   React.useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {
@@ -126,7 +158,28 @@ const EditProfile = ({
 
   // FUNCTIONS
   const handlePressEnd = () => {
-    console.log("handlePressEnd", uriProfilePicture);
+    if (uriProfilePicture) {
+      // Prima di tornare indietro, aggiorno il profilo con la nuova foto
+      mutation.mutate(uriProfilePicture);
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      let uri = result.assets[0].uri;
+      dispatch(setUriProfilePicture(uri));
+      // setImage(result.assets[0].uri);
+    }
   };
 
   if (isLoading) {
@@ -237,7 +290,7 @@ const EditProfile = ({
             label="Choose from library"
             onPress={() => {
               dismissAll();
-              navigation.navigate("EditProfileProfilePictureChooseFromLibrary");
+              pickImage();
             }}
             bottomDivider
             icon={<Ionicons name="image" size={16} color="black" />}

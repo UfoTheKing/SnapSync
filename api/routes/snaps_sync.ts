@@ -90,3 +90,27 @@ export const CheckSnapInstance = async (
     throw error;
   }
 };
+
+export const CreateSnapInstance = async (
+  userId: number,
+  tokenApi: string
+): Promise<{
+  message: string;
+  key: string;
+}> => {
+  try {
+    const response = await client.post(
+      `${API_PATH}/create/${userId}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${tokenApi}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

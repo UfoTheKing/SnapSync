@@ -426,7 +426,12 @@ const UserProfile = ({
             <View style={{ flex: 1, backgroundColor: "#fff" }}>
               <BottomSheetModalItem
                 label="Settings and privacy"
-                onPress={() => {}}
+                onPress={() => {
+                  dismissAll();
+                  navigation.navigate("UserSettingsStack", {
+                    screen: "UserSettings",
+                  });
+                }}
                 bottomDivider
                 icon={<Ionicons name="settings" size={16} color="black" />}
               />

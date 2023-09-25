@@ -1,10 +1,8 @@
 import {
   StyleSheet,
-  Text,
   RefreshControl,
   View,
   TouchableOpacity,
-  Platform,
 } from "react-native";
 import React from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,15 +13,15 @@ import { useQuery } from "react-query";
 import { FetchTimeline } from "@/api/routes/feed";
 import Container from "@/components/Container";
 import { SmallUser } from "@/models/resources/User";
-import AnimatedHeader, {
-  HEADER_HEIGHT,
-} from "@/components/Home/AnimatedHeader";
-import {
+import AnimatedHeader from "@/components/Home/AnimatedHeader/AnimatedHeader";
+import Animated, {
   useAnimatedScrollHandler,
   useSharedValue,
 } from "react-native-reanimated";
 import { AntDesign } from "@expo/vector-icons";
 import { ScreenWidth } from "@/constants/Layout";
+import { HEADER_HEIGHT } from "@/components/Home/AnimatedHeader/styles";
+import SnapSyncItem from "@/components/SnapSync/SnapSyncItem/SnapSyncItem";
 
 const Home = ({ navigation }: HomeStackScreenProps<"Home">) => {
   const ws = useSelector((state: RootState) => state.socket.ws);
@@ -149,6 +147,34 @@ const Home = ({ navigation }: HomeStackScreenProps<"Home">) => {
           scrollEnabled={true}
         />
       )} */}
+      <Animated.FlatList
+        data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => {
+          return (
+            <SnapSyncItem
+              leftImage="https://cdn.britannica.com/53/150453-050-35C31E41/City-hall-Radom-Pol.jpg"
+              rightImage="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2zxxiAZRPS-b2HjmxmD-g-FsiGlu_jtDYbg&usqp=CAU"
+            />
+          );
+        }}
+        // onRefresh={() => timelineRefetch()}
+        // refreshing={timelineIsRefetching}
+        refreshControl={
+          <RefreshControl
+            refreshing={timelineIsRefetching}
+            progressViewOffset={HEADER_HEIGHT + insets.top}
+            onRefresh={() => timelineRefetch()}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={scrollHandler}
+        contentContainerStyle={{
+          paddingTop: HEADER_HEIGHT + insets.top,
+        }}
+        scrollEnabled={true}
+      />
       <View
         style={{
           ...styles.snapSyncContainer,

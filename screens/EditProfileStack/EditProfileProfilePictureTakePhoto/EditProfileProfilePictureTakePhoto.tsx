@@ -1,4 +1,4 @@
-import { Button, StyleSheet, Text, View } from "react-native";
+import { Button, StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import { EditProfileStackScreenProps } from "@/types";
 import GoBackButton from "@/components/GoBackButton";

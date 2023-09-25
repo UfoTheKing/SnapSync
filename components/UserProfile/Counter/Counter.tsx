@@ -48,7 +48,7 @@ const Counter = (props: Props) => {
             </Text>
           </View>
         </TouchableOpacity>
-        <View style={[styles.cell, styles.border]}></View>
+        <View style={styles.border} />
         <TouchableOpacity onPress={onPressFriends} disabled={disabledFriends}>
           <View style={styles.cell}>
             <Text style={styles.number}>
@@ -76,8 +76,8 @@ export default Counter;
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    maxWidth: 327,
+    // width: "100%",
+    width: 327,
     height: 72,
     borderRadius: 16,
     marginTop: 24,
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: "center",
     justifyContent: "center",
+    width: 327 / 2 - 32,
   },
   border: {
     borderColor: "rgba(80, 90, 108, 1)",
