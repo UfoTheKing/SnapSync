@@ -147,10 +147,6 @@ export type SnapSyncStackParamList = {
   };
   TakeSnap: {
     key: string;
-    cWidth: number;
-    cHeight: number;
-    shape: Shape;
-    position: SnapShapePosition;
   };
   PublishSnap: {
     key: string;

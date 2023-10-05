@@ -113,10 +113,8 @@ const UserProfile = ({
       onSuccess: (data) => {
         if (friendshipsStatus && friendshipsStatus.isFriend) {
           // Se era mio amico lo rimuovo dalla lista
-          queryClient.invalidateQueries(["user", "friends", tokenApi]);
-          queryClient.removeQueries(["user", "friends", tokenApi], {
-            exact: true,
-          });
+          queryClient.invalidateQueries(["user", "friends"]);
+          queryClient.removeQueries(["user", "friends"]);
         } else if (friendshipsStatus && friendshipsStatus.incomingRequest) {
           // Se avevo una richiesta in entrata la rimuovo dalla lista
           queryClient.invalidateQueries([

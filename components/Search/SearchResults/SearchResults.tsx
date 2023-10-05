@@ -41,10 +41,8 @@ const SearchResults = (props: Props) => {
       onSuccess: () => {
         refetch();
 
-        queryClient.invalidateQueries(["user", "friends", tokenApi]);
-        queryClient.removeQueries(["user", "friends", tokenApi], {
-          exact: true,
-        });
+        queryClient.invalidateQueries(["user", "friends"]);
+        queryClient.removeQueries(["user", "friends"]);
       },
     }
   );
@@ -67,10 +65,8 @@ const SearchResults = (props: Props) => {
     {
       onSuccess: (data) => {
         refetch();
-        queryClient.invalidateQueries(["user", "friends", tokenApi]);
-        queryClient.removeQueries(["user", "friends", tokenApi], {
-          exact: true,
-        });
+        queryClient.invalidateQueries(["user", "friends"]);
+        queryClient.removeQueries(["user", "friends"]);
 
         queryClient.invalidateQueries(["user", "incoming_requests", tokenApi]);
         queryClient.removeQueries(["user", "incoming_requests", tokenApi], {

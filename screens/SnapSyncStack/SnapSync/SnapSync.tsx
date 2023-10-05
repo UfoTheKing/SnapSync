@@ -75,7 +75,7 @@ const SnapSync = ({
     refetch: refetchFriends,
     isRefetching: isRefetchingFriends,
   } = useInfiniteQuery(
-    ["user", "friends", tokenApi],
+    ["user", "friends", "streak", tokenApi],
     ({ pageParam = 1 }) =>
       FetchUserFriends(tokenApi, pageParam, 10, null, true),
     {

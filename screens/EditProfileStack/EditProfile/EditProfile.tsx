@@ -141,7 +141,7 @@ const EditProfile = ({
         );
       },
     });
-  }, [navigation, mutation.isLoading]);
+  }, [navigation, mutation.isLoading, uriProfilePicture]);
 
   React.useEffect(() => {
     navigation.addListener("beforeRemove", (e) => {

@@ -1,10 +1,4 @@
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Image,
-  Button,
-} from "react-native";
+import { StyleSheet, View, TouchableOpacity, Image, Text } from "react-native";
 import React from "react";
 import { SnapSyncStackScreenProps } from "@/types";
 import { useSelector } from "react-redux";
@@ -19,24 +13,17 @@ import useCountdown from "@bradgarropy/use-countdown";
 import { useTheme } from "native-base";
 import { SystemMessage } from "@/models/wss/SystemMessage";
 import Toast from "react-native-toast-message";
-import LottieView from "lottie-react-native";
 import { useMutation } from "react-query";
 import { SendSnap } from "@/api/routes/snaps_sync";
-import { manipulateAsync, SaveFormat } from "expo-image-manipulator";
 import { WssActions } from "@/utils/wss";
-import SnapSyncTitle from "@/components/SnapSync/SnapSyncTitle/SnapSyncTitle";
-import { Ionicons } from "@expo/vector-icons";
-import { Portal } from "react-native-portalize";
-import { BlurView } from "expo-blur";
 
 const TakeSnap = ({
   navigation,
   route,
 }: SnapSyncStackScreenProps<"TakeSnap">) => {
-  const { key, cHeight, cWidth, shape, position } = route.params;
+  const { key } = route.params;
 
   // REDUX
-  const snapSync = useSelector((state: RootState) => state.snapSync.snapSync);
   const ws = useSelector((state: RootState) => state.socket.ws);
   const isLogged = useSelector((state: RootState) => state.socket.isLogged);
   const tokenApi = useSelector((state: RootState) => state.user.tokenApi);
@@ -46,13 +33,6 @@ const TakeSnap = ({
 
   // HOOKS
   const insets = useSafeAreaInsets();
-  const countdown = useCountdown({
-    minutes: snapSync?.timer.minutes || 0,
-    seconds: snapSync?.timer.seconds || 10,
-    format: "mm:ss",
-    autoStart: false,
-    onCompleted: () => takeSnap(),
-  });
   const colors = useTheme().colors;
 
   // STATES
@@ -70,18 +50,12 @@ const TakeSnap = ({
   // EFFECTS
   React.useEffect(() => {
     navigation.setOptions({
-      headerShown: false,
+      headerShown: !isLogged && !key ? true : true,
+      headerShadowVisible: false,
       headerLeft: () => <GoBackButton onPress={() => navigation.goBack()} />,
       headerTitle: "",
     });
-    navigation.addListener("beforeRemove", (e) => {
-      if (ws && isLogged && snapSync && !forceReturnToHome) {
-        e.preventDefault();
-      } else {
-        navigation.dispatch(e.data.action);
-      }
-    });
-  }, [navigation, snapSync, forceReturnToHome, ws, isLogged]);
+  }, [navigation, isLogged, key]);
 
   React.useEffect(() => {
     if (ws && isLogged) {
@@ -115,46 +89,7 @@ const TakeSnap = ({
     }
   }, [ws, isLogged]);
 
-  React.useEffect(() => {
-    if (forceReturnToHome) {
-      // Rimuovo gli screen TakeSnap e SnapSync dalla history e torno alla TabHomeStack
-      navigation.navigate("Root", {
-        screen: "TabHomeStack",
-      });
-    }
-  }, [forceReturnToHome, navigation]);
-
   // FUNCTIONS
-  const takeSnap = async () => {
-    if (cameraRef.current && snapSync) {
-      const photo = await cameraRef.current.takePictureAsync();
-      const { uri } = photo;
-      // Faccio il resize dell'immagine senza fare il fill
-      // const manipResult = await manipulateAsync(
-      //   uri,
-      //   [{ resize: { width: position.width, height: position.height } }],
-      //   { compress: 1, format: SaveFormat.PNG, base64: false }
-      // );
-      // let data = {
-      //   key: key,
-      //   uri: manipResult.uri,
-      //   tokenApi: tokenApi,
-      // };
-      // mutation.mutate(data);
-
-      setUri(uri);
-    }
-  };
-
-  const toggleCameraType = () => {
-    setCameraType(
-      cameraType === CameraType.front ? CameraType.back : CameraType.front
-    );
-  };
-
-  const toggleFlashMode = () => {
-    setFlashMode(flashMode === FlashMode.off ? FlashMode.on : FlashMode.off);
-  };
 
   if (!ws || !isLogged) {
     return (
@@ -164,10 +99,12 @@ const TakeSnap = ({
     );
   }
 
-  if (!snapSync || !snapSync.timer || !snapSync.timer.start) {
-    <Container textCenter>
-      <ErrorText message="SnapSync not found" />
-    </Container>;
+  if (!key) {
+    return (
+      <Container textCenter>
+        <ErrorText message="Ops! Something went wrong. Please try again later." />
+      </Container>
+    );
   }
 
   // if (mutation.isLoading) {
@@ -210,122 +147,9 @@ const TakeSnap = ({
   //   );
   // }
 
-  if (uri) {
-    return (
-      <Container textCenter>
-        <Image
-          source={{ uri: uri }}
-          style={{
-            width: cWidth,
-            height: cHeight,
-          }}
-        />
-        <Button
-          title="Retry"
-          onPress={() => {
-            setUri(null);
-            countdown.reset();
-          }}
-        />
-      </Container>
-    );
-  }
-
   return (
-    <Container
-      safeAreaLeft={false}
-      safeAreaRight={false}
-      safeAreaTop={false}
-      safeAreaBottom={false}
-    >
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: insets.top,
-          maxHeight: shape.height,
-          maxWidth: shape.width,
-          marginBottom: insets.bottom,
-        }}
-      >
-        <Camera
-          ref={cameraRef}
-          style={{
-            width: cWidth,
-            height: cHeight,
-          }}
-          type={cameraType}
-          flashMode={flashMode}
-          onCameraReady={() => countdown.start()}
-        >
-          <View
-            style={{
-              height: 50,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
-              alignItems: "center",
-            }}
-          >
-            <TouchableOpacity onPress={() => toggleFlashMode()}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {flashMode === FlashMode.off ? (
-                  <Ionicons name="flash-off" size={24} color="white" />
-                ) : (
-                  <Ionicons name="flash" size={24} color="white" />
-                )}
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => toggleCameraType()}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {cameraType === CameraType.back ? (
-                  <Ionicons
-                    name="camera-reverse-outline"
-                    size={24}
-                    color="white"
-                  />
-                ) : (
-                  <Ionicons name="camera-outline" size={24} color="white" />
-                )}
-              </View>
-            </TouchableOpacity>
-          </View>
-        </Camera>
-      </View>
-      <View
-        style={{
-          height: 50 + insets.bottom,
-          width: ScreenWidth,
-          paddingLeft: insets.left,
-          paddingRight: insets.right,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <SnapSyncTitle
-          message={snapSync!.title.replaceAll(
-            "{{timer}}",
-            countdown.seconds.toString()
-          )}
-        />
-      </View>
+    <Container textCenter>
+      <Text>{key}</Text>
     </Container>
   );
 };

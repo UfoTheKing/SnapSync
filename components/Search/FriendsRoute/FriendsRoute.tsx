@@ -103,10 +103,8 @@ const FriendsRoute = (props: Props) => {
       onSuccess: () => {
         refetch();
 
-        queryClient.invalidateQueries(["user", "friends", tokenApi]);
-        queryClient.removeQueries(["user", "friends", tokenApi], {
-          exact: true,
-        });
+        queryClient.invalidateQueries(["user", "friends"]);
+        queryClient.removeQueries(["user", "friends"]);
       },
     }
   );
@@ -125,7 +123,7 @@ const FriendsRoute = (props: Props) => {
   } = useInfiniteQuery(
     ["user", "friends", tokenApi],
     ({ pageParam = 1 }) =>
-      FetchUserFriends(tokenApi, pageParam, 10, null, true),
+      FetchUserFriends(tokenApi, pageParam, 10, null, false),
     {
       enabled: isLoggedIn,
       getNextPageParam: (lastPage) => {

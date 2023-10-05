@@ -91,6 +91,9 @@ const styles = StyleSheet.create({
   border: {
     borderColor: "rgba(80, 90, 108, 1)",
     borderWidth: 1,
+    height: 48,
+    borderRadius: 10,
+    marginHorizontal: 42,
   },
   number: {
     fontSize: 20,
